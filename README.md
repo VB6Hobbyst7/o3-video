@@ -1,17 +1,15 @@
-# [o3-video - HTML5 Video Player]
+# o3-video - HTML5 Video Player
 ========
 
 > o3-video is a web video player built on the basic web browser HTML5 player and tiny Flash video player. It supports video playback on desktops and mobile devices.
 
 ## Features
 
-Lightweight, less than 10kb
-Works on desktops and mobile devices
-Supported web browsers: IE6+, Firefox, Chrome, Safari, Opera and more  
+* Lightweight, less than 10kb
+* Works on desktops and mobile devices
+* Supported web browsers: IE6+, Firefox, Chrome, Safari, Opera and more  
 
 ## Usage
-
-Define the HTML5 video tag
 
 ```html
 <!DOCTYPE html>
@@ -28,7 +26,7 @@ Define the HTML5 video tag
 	</script>
 </head>
 <body>
-	<video width="540" height="380" id="video1" controls poster="poster1.jpg">
+	<video width="540" height="380" controls poster="poster1.jpg">
 		<source src="video1.mp4" type="video/mp4"> 
 	</video>
 </body>
