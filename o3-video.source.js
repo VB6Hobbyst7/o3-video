@@ -59,7 +59,7 @@ o3video = function( opts, container ) {
 
 	/** Constructor */
 	self.constructor__ = function() {
-
+		
 		//save original video attributes
 		var autoplay = get_prop( self.container, "autoplay", false ),
 			controls = get_prop( self.container, "controls", false ),
@@ -73,15 +73,14 @@ o3video = function( opts, container ) {
 			innerHTML = get_prop( self.container, "innerHTML", '' );
 			
 		//create iframe
-		self.iframe = $('<iframe></iframe>').insertAfter(self.container).attr({
+		self.iframe = $('<iframe frameborder="0"></iframe>').insertAfter(self.container).attr({
 			id: self.container.prop("id"),
 			src: "about:blank",
 			width: width,
 			height: height,
-			frameborder: 0,
 			allowfullscreen: true,
 			style: self.container.prop("style"),
-			class: self.container.prop("class")
+			'class': self.container.prop("class")
 		});
 
 		//get sources
@@ -106,8 +105,29 @@ o3video = function( opts, container ) {
 		var no_support_msg = get_prop( self.container, "innerHTML", '' );
 		no_support_msg = $.trim(no_support_msg).length == 0 ? o3video_config.no_support_msg : no_support_msg;
 
-		//stop loading original video and remove it from DOM
-		self.container.src = false;
+		//stop loading the original video and remove it from DOM
+		self.container.src = false;		
+
+		//msie 8 and below do not support video tag, so we need to remove the video sibling by sibling from DOM
+		if ( /MSIE/i.test(navigator.userAgent) && parseFloat((navigator.userAgent.toLowerCase().match(/.*(?:rv|ie)[\/: ](.+?)([ \);]|$)/) || [])[1]) < 9 ) {			
+			var old_obj = self.container.get(0),
+				rem_list = [];	
+			//get elements from inside the video
+			while ( old_obj.nextSibling && old_obj.nextSibling.tagName != '/VIDEO' )	{				
+				old_obj = old_obj.nextSibling;
+				if ( old_obj.tagName != 'IFRAME' )
+					rem_list.push( old_obj );
+			}
+			//get the video closeing element
+			old_obj = old_obj.nextSibling;
+			if ( old_obj.tagName == '/VIDEO' )
+				rem_list.push( old_obj );
+			//remove from DOM
+			for ( var i = 0 ; i < rem_list.length; i++ )
+				$(rem_list[i]).remove();
+		}
+
+		//remove video tag from DOM
 		self.container.remove();
 
 		var myContent = '<!DOCTYPE html>'
@@ -153,9 +173,16 @@ o3video = function( opts, container ) {
 		self.iframe_vid.poster = poster;
 		self.iframe_vid.preload = preload;
 		if ( src != '' )
-			self.iframe_vid.src = src;		
-		self.iframe_vid.innerHTML = innerHTML;
-		self.iframe_vid.load(); //force chrome to reload the file
+			self.iframe_vid.src = src;
+		
+		//bugfix for ie8
+		try {
+			self.iframe_vid.innerHTML = innerHTML;
+		} catch (e) {};
+
+		//bugfix for chrome, force to reload the file
+		if ( typeof self.iframe_vid.load == 'function' )
+			self.iframe_vid.load(); 
 
 		//add resize event
 		$(self.iframe_wnd).resize( function() { self.iframe_resize(); } );

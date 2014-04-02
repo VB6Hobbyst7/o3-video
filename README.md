@@ -1,7 +1,7 @@
 # o3-video - HTML5 Video Player
 ========
 
-> o3-video is a web video player built on the basic web browser HTML5 player and tiny Flash video player. It supports video playback on desktops and mobile devices.
+> o3-video is a web video player built on the web browser's basic HTML5 player and a tiny Flash video player. It supports video playback on desktops and mobile devices.
 
 ## Features
 
