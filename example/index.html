@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<head>
+	<title>o3-video example</title>
+	<meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">   
+    <style type="text/css">
+    
+    body, html {
+    	font-size: 14px;
+    	color: #000000;
+        font-family: sans-serif;
+    }
+
+    input {
+        font-family: inherit;
+        font-size: inherit;
+    }
+
+    .resp_player {
+        width: 640px;
+        height: 480px;
+        max-width: 100%;    
+    }
+
+    .float_player {
+        float: right; 
+        width: 320px;
+        height: 160px;   
+        background: #000000;  
+        border: 1px solid #000000;
+    }
+
+    </style>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.0/jquery.min.js"></script>
+    <script src="../source/o3-video.source.js"></script>
+    <script type="text/javascript">
+
+        (function($) {
+            $(document).ready(function () {                 
+                
+                $('video').o3video();
+            
+            });
+        })(jQuery);
+        
+
+    </script>
+</head>
+<body style="background: #DDDDDD;">
+
+	<h1>O3 video example</h1>
+
+    <video width="540" height="380" muted loop id="video1" controls class="resp_player" poster="poster1.jpg">
+        <source src="video1.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <input type="button" value="+" onclick="$('#video1').width($('#video1').width()+30); $('#video1').height($('#video1').height()+30);">
+    <input type="button" value="-" onclick="$('#video1').width($('#video1').width()-30); $('#video1').height($('#video1').height()-30);">
+
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam malesuada urna tellus. Donec mattis nec mauris sit amet commodo. Ut commodo, nisi eget suscipit pulvinar, ipsum leo facilisis est, nec interdum nisl enim nec elit. Phasellus felis risus, auctor eu vestibulum et, semper nec metus. Maecenas sed eleifend arcu, non placerat orci. Ut turpis arcu, volutpat a turpis a, bibendum cursus eros. Quisque nibh metus, cursus ac odio in, tristique vehicula tellus. Vivamus varius urna mi, eu eleifend enim vestibulum nec. Morbi volutpat lorem tristique velit iaculis varius. Nam ac leo ante. Curabitur vitae erat ante. Ut pretium mattis euismod. Sed rutrum sagittis urna a luctus. Nullam porta tellus porttitor sapien placerat, nec adipiscing augue bibendum. Donec vitae consequat magna. Quisque in ante imperdiet, consectetur neque sed, commodo nisi.</p>
+
+    <p>
+
+    <input type="button" value="Show/hide" onclick="$('#video2').css('display', $('#video2').css('display') == 'none' ? 'block' : 'none' )" style="float: right;">
+
+    <video id="video2" muted poster="poster2.jpg" class="float_player">
+        <source src="video2.mp4" type="video/mp4">
+    </video> 
+
+    Nam pharetra lobortis sem a consequat. Sed lacinia vitae nunc sit amet porttitor. Etiam interdum tempor interdum. Duis vulputate tincidunt velit ut rutrum. Quisque sit amet quam pulvinar tellus pharetra adipiscing. Fusce imperdiet rutrum ante, non vehicula diam fringilla non. Donec ut tempor ipsum, quis malesuada lorem. Suspendisse accumsan sed ligula at egestas. Nam rutrum lacus nisi, non rutrum ligula mattis non. Sed tempus est nisl, ac blandit sapien sagittis eget. Fusce dictum malesuada mi, ac imperdiet diam tempus at.</p>
+
+    <p>Nullam auctor tempus leo, a iaculis sapien faucibus et. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nullam porta ultricies nisi, et aliquam ante tempus ut. Fusce nec justo massa. Suspendisse mollis imperdiet vehicula. Suspendisse a orci lacinia ligula posuere facilisis. Praesent nec nunc vel nibh venenatis tincidunt sed at justo. Praesent eleifend sapien eget risus pharetra, vel commodo dolor vestibulum. Maecenas mollis massa sed elementum fringilla. In dignissim justo vitae lacus congue tempor. Cras dui leo, semper scelerisque est vel, tincidunt mollis urna. Donec lobortis justo tellus, quis vulputate ante dignissim ac. Vestibulum erat velit, ullamcorper vel dui id, malesuada luctus quam. Sed vulputate turpis neque, id tincidunt leo ornare id. Ut eleifend ipsum vitae mauris interdum tempor. Nullam ultrices tincidunt euismod.</p>
+
+    <p>
+    Sed consequat lacus nec turpis interdum varius. Quisque euismod libero at libero porta tincidunt. Vestibulum ac nulla sed lorem suscipit ullamcorper ut quis lectus. Aliquam non feugiat velit. Donec ipsum dolor, condimentum eget lacinia porttitor, rutrum sed magna. Donec ut pharetra eros. Quisque sit amet augue a nisi gravida egestas non quis eros. Praesent cursus in arcu in lobortis. Nam ut erat at odio rhoncus eleifend.</p>
+
+    <p>Praesent volutpat magna arcu, non pharetra felis venenatis id. Duis pretium velit ligula, ac scelerisque ante ullamcorper at. Integer posuere augue non nisi adipiscing porttitor. Suspendisse quis fringilla leo. Vivamus placerat aliquam lacus, eu commodo eros. Phasellus in fermentum sem. Praesent tempus facilisis ipsum ut varius. Maecenas ac vehicula urna. Fusce in varius justo, in eleifend ligula. Integer eu mi pretium, lacinia nisl vitae, porttitor odio. Vestibulum ut nibh blandit, posuere leo quis, posuere sem. Duis rutrum, velit ac adipiscing tempor, est arcu vulputate eros, eget dignissim leo justo vel velit. Mauris congue metus tempus ipsum feugiat tristique. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Ut nec iaculis enim.</p>
+
+</body>
