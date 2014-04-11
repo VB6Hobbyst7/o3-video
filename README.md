@@ -35,10 +35,10 @@
 
 ## Requirements
 
-[jQuery 1.6.0 or higher](http://jquery.com/download)
+[jQuery 1.7.2 or higher](http://jquery.com/download)
 
 ## License
 
-o3-video is licensed under the MIT License. [View the license file](LICENSE)
+Video.js is licensed under the MIT License. [View the license file](LICENSE)
 
 Copyright 2014 Zoltan Fischer
