@@ -154,6 +154,13 @@ o3video = function( opts, container ) {
 			//get elements from inside the video
 			while ( old_obj.nextSibling && old_obj.nextSibling.tagName != '/VIDEO' )	{				
 				old_obj = old_obj.nextSibling;
+				//get flash source for ie8
+				if ( old_obj.tagName == 'SOURCE' ) {					
+					if ( self.ext2mime(old_obj.src) == 'video/mp4' && self.flash_src == '' )
+						self.flash_src = old_obj.src;
+					if ( !(/^(?:[a-z]+:)?\/\//i.test(self.flash_src)) ) //if the src is relative we need to convert to absolute
+						self.flash_src = document.location.protocol+'//'+document.location.hostname+document.location.pathname+self.flash_src											
+				}
 				if ( old_obj.tagName != 'IFRAME' )
 					rem_list.push( old_obj );
 			}
@@ -211,7 +218,7 @@ o3video = function( opts, container ) {
 		//get no support message holder
 		self.$no_support_msg = $(self.iframe_doc).find('.no_support_msg');	
 
-
+		//create overlay play btn
 		self.create_playbtn();
 
 		//create HTML5 video tag only if supported or codec available
@@ -228,6 +235,10 @@ o3video = function( opts, container ) {
 			//if flash player ver min. 9 exists and mp4 source exists show flash player
 			if ( self.flash_exists >= 9 && self.flash_src != '' ) {			
 			
+				//show overlay play btn
+				if ( !this.origin.autoplay )
+					self.$playbtn.css('display','block');
+
 				//create flash object			
 				self.create_flash();
 
@@ -284,17 +295,18 @@ o3video.prototype.create_playbtn = function() {
 	if ( this.origin.autoplay || /firefox/i.test(navigator.userAgent) || 
 		 /iPod/i.test(navigator.userAgent) || /iPad/i.test(navigator.userAgent) || /iPhone/i.test(navigator.userAgent) || 
 		 /Windows Phone/i.test(navigator.userAgent) || /Android/i.test(navigator.userAgent) ) {
-		;
+		//show play overlay btn
+		this.$playbtn.css('display','none');
 	} else { 
 		//show play overlay btn
-		this.$playbtn.css('display','block');	
+		this.$playbtn.css('display','block');
+	};	
 		
-		var self = this;
-		//play the video on click on overlay play button 
-		this.$playbtn.click(function(){ 
-			self.play(); 
-		});
-	};
+	var self = this;
+	//play the video on click on overlay play button 
+	this.$playbtn.click(function(){ 
+		self.play(); 
+	});
 };
 
 
@@ -302,8 +314,10 @@ o3video.prototype.create_playbtn = function() {
 *
 * @param string name Name of the object 
 */
-o3video.prototype.get_flash_ref = function() {
-   return typeof(this.iframe_doc[this.flash_name]) != undefined ? this.iframe_doc[this.flash_name] : this.iframe_wnd[this.flash_name];
+o3video.prototype.get_flash_ref = function() {	
+	var obj = typeof(this.iframe_doc[this.flash_name+'_obj']) != undefined ? this.iframe_doc[this.flash_name+'_obj'] : this.iframe_wnd[this.flash_name+'_obj'],
+		embed = typeof(this.iframe_doc[this.flash_name+'_embed']) != undefined ? this.iframe_doc[this.flash_name+'_embed'] : this.iframe_wnd[this.flash_name+'_embed'];		  
+	return embed ? embed : obj;
 };
 
 
@@ -350,19 +364,20 @@ o3video.prototype.create_flash = function() {
 				   +'&muted='+( this.origin.muted ? 'true' : 'false' );	
 
 	//create poster because flash player has no built in support
-	this.load_poster(this.origin.poster);
+	if ( !this.origin.autoplay )
+		this.load_poster(this.origin.poster);
 
 	//create flash object name
 	this.flash_name = 'o3f'+Math.random().toString().replace('.','');
 	
-	$('<object name="'+this.flash_name+'" width="100%" height="100%">'
-	 +'<param name="movie" value="'+o3video_config.script_uri+'../o3-video.flash.swf?'+Date.now()+'"></param>'
+	$('<object name="'+this.flash_name+'_obj" id="'+this.flash_name+'_obj" width="100%" height="100%">'
+	 +'<param name="movie" value="'+o3video_config.script_uri+'../o3-video.flash.swf?'+Math.random()+'"></param>'
 	 +'<param name="flashvars" value="'+flashvars+'"></param>'
 	 +'<param name="allowFullScreen" value="true"></param>'
 	 +'<param name="allowscriptaccess" value="always"></param>'
 	 +'<param name="quality" value="hight"></param>'
 	 +'<param name="wmode" value="transparent"></param>'
-	 +'<embed name="'+this.flash_name+'" src="'+o3video_config.script_uri+'../o3-video.flash.swf?'+Date.now()+'" type="application/x-shockwave-flash" allowscriptaccess="always"'
+	 +'<embed name="'+this.flash_name+'_embed" id="'+this.flash_name+'_embed"  src="'+o3video_config.script_uri+'../o3-video.flash.swf?'+Math.random()+'" type="application/x-shockwave-flash" allowscriptaccess="always"'
 	 +'wmode="transparent" quality="high" allowfullscreen="true" width="100%" height="100%" flashvars="'+flashvars+'"></embed>'
 	 +'</object>').appendTo(this.$iframe_main);
 };
