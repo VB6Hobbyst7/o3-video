@@ -25,7 +25,9 @@ o3video = function( opts, container ) {
 	var $ = jQuery;
 	
 	//options
-	self.opts = $.extend( {}, opts );
+	self.opts = $.extend( {
+		playButtonImage: 'data:image/png;base64,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'
+	}, opts );
 
 	//container
 	self.container = $(container); 
@@ -58,9 +60,6 @@ o3video = function( opts, container ) {
 
 	//jQuery obj of iframe overlay play button
 	self.$playbtn = null;
-
-	//jQuery obj of iframe poster
-	self.$poster = null;
 
 	//jQuery obj of iframe no supported codec or player message
 	self.$no_support_msg = null;
@@ -183,19 +182,13 @@ o3video = function( opts, container ) {
 		    + '<style type="text/css">'
 		    + 'body,html { padding: 0px; margin: 0px; overflow: hidden; }'
 		    + '.transition { -moz-transition: all 0.3s linear; -webkit-transition: all 0.3s linear; -o-transition: all 0.3s linear; transition: all 0.3s linear; } '
-		    + '.fill_wnd { display: block; position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; } '
-		    + '.playbtn { display: none; visibility: visible; opacity: 1; z-index: 10; }'
-		    + '.playbtn i { opacity: 1; display: block; background-image: url(data:image/png;base64,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); background-position: center; background-repeat: no-repeat; -moz-transition: all 0.3s linear; -webkit-transition: all 0.3s linear; -o-transition: all 0.3s linear; transition: all 0.3s linear; }'
-		    + '.playbtn:hover i { opacity: 0.6 }'
+		    + '.fill_wnd { display: block; position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; } '		    
+		    + '.playbtn { opacity: 1; visibility: visible; z-index: 10; pointer: cursor; position: absolute; left: 50%; right: 50%; top: 50%; bottom: 50%; margin-left: -46px; margin-top: -46px;  width: 93px; height: 94px; display: block; background-image: url('+self.opts.playButtonImage+'); background-position: center; background-repeat: no-repeat; -moz-transition: all 0.2s ease-in; -webkit-transition: all 0.2s ease-in; -o-transition: all 0.2s ease-in; transition: all 0.2s ease-in; border-radius: 45px; -webkit-border-radius: 45px; -moz-border-radius: 45px; }'
+		    + '.playbtn:hover { opacity: 0.6 }'
 		    + '.playbtn_hide { visibility: hidden; opacity: 0; -ms-transform: scale(2,2); -webkit-transform: scale(2,2); transform: scale(2,2); }'
 		    + '.no_support_msg { display: none; font-size: 14px; color: #000000; font-family: sans-serif; background: #FFFFFF; text-align: center; padding: 20px 0px 0px 0px; }'
-		    + '.poster { display: none; }'
-		    + '.postert { display: table; width: 100%; height: 100%; }'
-		    + '.posterr { display: table-row; }'
-		    + '.posterc { display: table-cell; width: 100%; height: 100%; text-align: center; vertical-align: middle }'
-		    + '.poster img { border: 0px; }'
 		    + '</style>'
-		    + '</head><body><div id="main" class="fill_wnd"><div class="poster fill_wnd"><div class="postert"><div class="posterr"><div class="posterc"><img src="" alt=""></div></div></div></div><a href="javascript:{}" class="playbtn transition fill_wnd"><i class="transition fill_wnd"></i></a><div class="no_support_msg transition fill_wnd">'+no_support_msg+'</div></div></body></html>';
+		    + '</head><body><div id="main" class="fill_wnd"><a href="javascript:{}" class="playbtn transition"></a><div class="no_support_msg transition fill_wnd">'+no_support_msg+'</div></div></body></html>';
 
 		//store iframe container window		    
 		self.iframe_wnd = self.$iframe.get(0).contentWindow;
@@ -211,9 +204,6 @@ o3video = function( opts, container ) {
 
 		//get overlay play btn
 		self.$playbtn = $(self.iframe_doc).find('.playbtn');
-
-		//get poster
-		self.$poster = $(self.iframe_doc).find('.poster');
 		
 		//get no support message holder
 		self.$no_support_msg = $(self.iframe_doc).find('.no_support_msg');	
@@ -229,15 +219,14 @@ o3video = function( opts, container ) {
 
 		} else {
 
+			//hide the overlay play button
+			this.$playbtn.css('display','none');
+
 			//check for flash player version
 			self.flash_exists = self.get_flash_version().split(',').shift();			
 
 			//if flash player ver min. 9 exists and mp4 source exists show flash player
 			if ( self.flash_exists >= 9 && self.flash_src != '' ) {			
-			
-				//show overlay play btn
-				if ( !this.origin.autoplay )
-					self.$playbtn.css('display','block');
 
 				//create flash object			
 				self.create_flash();
@@ -246,13 +235,7 @@ o3video = function( opts, container ) {
 				
 				//show not support msg
 				self.$no_support_msg.css('display','block');
-
-				//hide the overlay play button
-				this.$playbtn.css('display','none');
-
-				//hide the poster
-				this.$poster.css('display','none');
-
+				
 			}						
 		
 		}
@@ -264,20 +247,28 @@ o3video = function( opts, container ) {
 };
 
 
+/** 
+* hide/show overlay play button) 
+* @param boolean hide (optional) Default: true 
+*/
+o3video.prototype.hideOverlayPlayBtn = function( hide ) {
+	hide = typeof hide == 'undefined' ? true : hide; 
+	
+	if ( hide ) {
+		var btn = this.$playbtn.addClass('playbtn_hide');
+		setTimeout(function(){ btn.css('display','none'); },300);
+	} else {
+		this.$playbtn.css('display','block').removeClass('playbtn_hide');		
+	}
+}
+
 /** start/seek the video player */
 o3video.prototype.play = function() {
 	if ( this.type == 'html5' ) {
 		this.$iframe_vid.get(0).play();
 	} else {
 		this.get_flash_ref().play();
-	}
-	//hide the overlay play button
-	var btn = this.$playbtn.addClass('playbtn_hide');
-	setTimeout(function(){ btn.css('display','none'); },300);
-
-	//hide the poster
-	this.$poster.css('display','none');
-
+	}	
 };
 
 /** start/seek the video player */
@@ -320,52 +311,14 @@ o3video.prototype.get_flash_ref = function() {
 	return embed ? embed : obj;
 };
 
-
-//show or hide poster
-o3video.prototype.show_poster = function( show ) {
-	show = typeof show == undefined ? true : show;
-	if ( this.$poster.css('display') != 'block' )
-		this.$poster.css('display','block');
-};
-
-//resize poster img
-o3video.prototype.resize_poster = function() {
-	var self = this,
-		img = self.$poster.find('img');
-		ow = img.attr('original-width'), //original width
-		oh = img.attr('original-height'), //original height
-		hw = jQuery(self.iframe_wnd).width(), //holder width
-		hh = jQuery(self.iframe_wnd).height(), //holder height		
-		dir = ow > oh ? 1 : 0;
-	img.css({ 
-		width: dir == 1 ? '100%' : 'auto', 
-		height: dir == 0 ? '100%' : 'auto',		
-	});
-};
-
-/** load poster */
-o3video.prototype.load_poster = function( src ) {
-	var self = this,
-		img = self.$poster.find('img');
-	img.bind('load',function(e) {
-		img.attr('original-width',img.get(0).width);
-		img.attr('original-height',img.get(0).height);
-		self.show_poster();
-		self.resize_poster();
-	}).attr('src',src);
-};
-
 /** create and add flash object to the iframe */
 o3video.prototype.create_flash = function() {
 	this.type = 'flash';
 	var flashvars = 'src='+this.flash_src
 				   +'&autoplay='+( this.origin.autoplay ? 'true' : 'false' )
 				   +'&loop='+( this.origin.loop ? 'true' : 'false' )
-				   +'&muted='+( this.origin.muted ? 'true' : 'false' );	
-
-	//create poster because flash player has no built in support
-	if ( !this.origin.autoplay )
-		this.load_poster(this.origin.poster);
+				   +'&muted='+( this.origin.muted ? 'true' : 'false' )
+				   +'&playButtonImage='+this.opts.playButtonImage.replace(/\+/g,'%2B');	
 
 	//create flash object name
 	this.flash_name = 'o3f'+Math.random().toString().replace('.','');
@@ -377,13 +330,15 @@ o3video.prototype.create_flash = function() {
 	 +'<param name="allowscriptaccess" value="always"></param>'
 	 +'<param name="quality" value="hight"></param>'
 	 +'<param name="wmode" value="transparent"></param>'
+	 +'<param name="menu" value="true"></param>'
 	 +'<embed name="'+this.flash_name+'_embed" id="'+this.flash_name+'_embed"  src="'+o3video_config.script_uri+'../o3-video.flash.swf?'+Math.random()+'" type="application/x-shockwave-flash" allowscriptaccess="always"'
-	 +'wmode="transparent" quality="high" allowfullscreen="true" width="100%" height="100%" flashvars="'+flashvars+'"></embed>'
+	 +'wmode="transparent" menu="true" quality="high" allowfullscreen="true" width="100%" height="100%" flashvars="'+flashvars+'"></embed>'
 	 +'</object>').appendTo(this.$iframe_main);
 };
 
 /** create and add HTML5 video tag to the iframe */
 o3video.prototype.create_video = function() {
+	var self = this;
 	this.type = 'html5';
 	//create iframe video object and copy original video properties
 	this.$iframe_vid = $('<video id="video" width="100%" height="100%"'
@@ -403,7 +358,11 @@ o3video.prototype.create_video = function() {
 	if ( this.origin.poster ) {
 		this.$iframe_vid.get(0).poster = '';
 		this.$iframe_vid.get(0).poster = this.origin.poster;
-	}	
+	}
+
+	//on playing hide overlay play btn
+	this.$iframe_vid.bind('playing',function(){ self.hideOverlayPlayBtn(); });
+
 };
 
 /** 

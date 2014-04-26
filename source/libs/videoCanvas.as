@@ -303,7 +303,6 @@
 						break;
 					case "NetStream.Buffer.Full":
 					case "NetStream.Buffer.Flush":												
-						//trace('bufferFull');
 						if ( !this.isStream() )
 							this.stream_ns.bufferTime = this.hiBufferTime;
 						dispatchEvent( new Event('bufferFull') );
