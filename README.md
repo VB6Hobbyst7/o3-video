@@ -5,9 +5,10 @@
 
 ## Features
 
-* Lightweight, less than 10kb
+* Lightweight, less than 20kb
 * Works on desktops and mobile devices
-* Supported web browsers: IE6+, Firefox, Chrome, Safari, Opera and more  
+* Plays mp4, with h264 codec, on all devices
+* Supported web browsers: IE8+, Firefox, Chrome, Safari, Opera and more  
 
 ## Usage
 
