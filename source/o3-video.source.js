@@ -81,10 +81,12 @@ o3video = function( opts, container ) {
 
 	//store original video attributes
 	self.origin = { autoplay: self.get_prop( self.container, "autoplay", false ),
-					controls: self.get_prop( self.container, "controls", false ),
+					//check for muted, webkit dosn't supports the muted attribute, we need to check in the HTML code, @todo: regexp need to improved
+					controls: / controls/i.test(self.container.get(0).outerHTML), 
+					//controls: self.get_prop( self.container, "controls", false ),
 					height: self.get_prop( self.container, "height", 'auto' ),
 					loop: self.get_prop( self.container, "loop", false ),
-					//check for muted, webkit dosn't supports the muted attribute, we need tocheck in the HTML code, @todo: regexp need to improved
+					//check for muted, webkit dosn't supports the muted attribute, we need to check in the HTML code, @todo: regexp need to improved
 					muted: / muted/i.test(self.container.get(0).outerHTML), 
 					poster: self.get_prop( self.container, "poster", '' ),
 					preload: self.get_prop( self.container, "preload", false ),
@@ -158,7 +160,7 @@ o3video = function( opts, container ) {
 					if ( self.ext2mime(old_obj.src) == 'video/mp4' && self.flash_src == '' )
 						self.flash_src = old_obj.src;
 					if ( !(/^(?:[a-z]+:)?\/\//i.test(self.flash_src)) ) //if the src is relative we need to convert to absolute
-						self.flash_src = document.location.protocol+'//'+document.location.hostname+document.location.pathname+self.flash_src											
+						self.flash_src = window.location.protocol+'//'+window.location.hostname+window.location.pathname+self.flash_src											
 				}
 				if ( old_obj.tagName != 'IFRAME' )
 					rem_list.push( old_obj );
@@ -318,6 +320,8 @@ o3video.prototype.create_flash = function() {
 				   +'&autoplay='+( this.origin.autoplay ? 'true' : 'false' )
 				   +'&loop='+( this.origin.loop ? 'true' : 'false' )
 				   +'&muted='+( this.origin.muted ? 'true' : 'false' )
+				   +'&controls='+( this.origin.controls ? 'true' : 'false' )				   
+				   +'&poster='+( this.origin.poster.replace(/\+/g,'%2B') )
 				   +'&playButtonImage='+this.opts.playButtonImage.replace(/\+/g,'%2B');	
 
 	//create flash object name
@@ -340,6 +344,7 @@ o3video.prototype.create_flash = function() {
 o3video.prototype.create_video = function() {
 	var self = this;
 	this.type = 'html5';
+
 	//create iframe video object and copy original video properties
 	this.$iframe_vid = $('<video id="video" width="100%" height="100%"'
 						+ ( this.origin.autoplay ? ' autoplay ' : '' )
