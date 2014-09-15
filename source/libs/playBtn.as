@@ -1,4 +1,10 @@
-﻿package libs {
+﻿/*
+O3 Video Player Overlay Play Button
+libs.playBtn
+Created by Zoltan Lengyel-Fischer (2014)
+*/
+
+package libs {
 
 	import flash.display.MovieClip;
 	import flash.display.Loader;
@@ -23,30 +29,34 @@
 		
 		public var contentloader = new Loader();
 		
-		//flag if need to be showed
+		//Flag, true if play button need to be showed
 		private var show_ = true;
 		
-		//mouse over effect
+		//Mouse over effect
 		var overEffect:Object = null;
 				
+		//Constructor
 		public function playBtn( width_, height_ ) {
-			//set dimension
+			
+			//Store dimension
 			this.width_ = width_;
 			this.height_ = height_;
 			
-			//add content loader
+			//Add content loader to MC
 			this.addChild(this.contentloader);
 			
-			//set hidden
+			//Hide playbutton until image is loaded
 			this.visible = false;
 			this.useHandCursor = true;
 			this.buttonMode = true;
 			
+			//Handles for mouse over/out
 			this.addEventListener( MouseEvent.MOUSE_OVER, this.mouseOver );
 			this.addEventListener( MouseEvent.MOUSE_OUT, this.mouseOut );
 			
 		}
 		
+		//Mouse over effect
 		private function mouseOver( event:MouseEvent ) {
 			if ( this.overEffect != null )
 				this.overEffect.stop();
@@ -54,6 +64,7 @@
 			this.overEffect.start();
 		}
 		
+		//Mouse out effect
 		private function mouseOut( event:MouseEvent ) {
 			if ( this.overEffect != null )
 				this.overEffect.stop();
@@ -61,21 +72,21 @@
 			this.overEffect.start();
 		}
 		
-		//show object if loaded
+		//Set show state true
 		public function show() {
 			this.show_ = true;			
 		}
 		
-		//hide object
+		//Hide object, show fadeout effect
 		public function hide() {
 			if ( this.show_ !== false ) { 
 				this.show_ = false;
-				//stop loading
+				//Stop loading
 				try{
 					this.contentloader.close();
 				} catch(e:Error){}			
 				
-				//animate out
+				//Animate out
 				var xEffect = new Tween( contentloader, "x", Regular.easeOut, contentloader.x, contentloader.x - contentloader.width, 0.5, true);
 				var yEffect = new Tween( contentloader, "y", Regular.easeOut, contentloader.y, contentloader.y - contentloader.height, 0.5, true);
 				var wEffect = new Tween( contentloader, "width", Regular.easeOut, contentloader.width, contentloader.width * 3, 0.5, true);
@@ -86,13 +97,15 @@
 			}
 		}
 		
-		//make visible false
+		//Hide play button if fade out effect finished
 		private function hideTweenComplete( event:TweenEvent ) {
 			this.visible = false;
 		}
 		
-		//set the video/audio file 
-		public function setFile( file, loadtype ) {
+		//Set the image file
+		//@param file:String File URL or Base64 string
+		//@param loadtype:String Base64 or URL
+		public function setFile( file, loadtype = 'URL' ) {
 				
 			this.file_ = file;
 			this.loadtype_ = loadtype;
@@ -111,6 +124,7 @@
 			 	this.contentloader.close();
 			} catch(e:Error){}
 			
+			//Load image
 			if ( loadtype == 'base64' ) {
 				var bytes:ByteArray = Base64Decoder.decodeToByteArray( this.file_ );
 				contentloader.loadBytes( bytes );
@@ -119,18 +133,21 @@
 			}
 		}
 		
-		//loading done
+		//Image loading done
 		private function loadingDone( event:Event ) {
+			//Recalculate button dimension and position
 			this.resize( this.width_, this.height_ );			
+			//Show button if needed
 			this.visible = this.show_;
 		}
 		
-		//loading error
+		//Loading error
 		private function loadingError( event:IOErrorEvent ) {
+			//On error hide button
 			this.visible = false;
 		}	
 		
-		//reposition/resize object
+		//Update dimension and size
 		public function resize( width:Number, height:Number ) {
 			this.width_ = width;
 			this.height_ = height;

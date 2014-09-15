@@ -1,4 +1,10 @@
-﻿package libs {
+﻿/*
+O3 Video Player Poster
+libs.videoPoster
+Created by Zoltan Lengyel-Fischer (2014)
+*/
+
+package libs {
 
 	import flash.display.MovieClip;
 	import flash.display.Loader;
@@ -19,40 +25,41 @@
 		
 		public var contentloader = new Loader();
 		
-		//flag if need to be showed
+		//Flag if need to be showed
 		private var show_ = true;
 		
-		//bg image object
+		//Background image
 		private var bgImage:Bitmap = new Bitmap();
 		
+		//Constructor
 		public function videoPoster( width_, height_ ) {
-			//set dimension
+			//Set dimension
 			this.width_ = width_;
 			this.height_ = height_;
 			
-			//add content loader
+			//Add content loader
 			//this.addChild(this.contentloader);
 			
-			//set hidden
+			//Set hidden
 			this.visible = false;
 		}
 		
-		//show object if loaded
+		//Show object if loaded
 		public function show() {
 			this.show_ = true;			
 		}
 		
-		//hide object
+		//Hide object
 		public function hide() {
 			this.show_ = false;
-			//stop loading
+			//Stop loading
 			try{
 			 	this.contentloader.close();
 			} catch(e:Error){}			
 			this.visible = false;
 		}
 		
-		//set the video/audio file 
+		//Set the video/audio file 
 		public function setFile( file ) {
 			this.file_ = file;
 			this.type_ = file.substr( file.lastIndexOf('.') + 1, file.length );			
@@ -72,18 +79,18 @@
 			this.contentloader.load( new URLRequest( this.file_ ), contentloaderContext );						
 		}
 		
-		//loading done
+		//Loading done
 		private function loadingDone( event:Event ) {
 			this.resize( this.width_, this.height_ );			
 			this.visible = this.show_;
 		}
 		
-		//loading error
+		//Loading error
 		private function loadingError( event:IOErrorEvent ) {
 			this.visible = false;
 		}	
 		
-		//reposition/resize object
+		//Reposition/resize object
 		public function resize( width:Number, height:Number ) {
 			this.width_ = width;
 			this.height_ = height;
@@ -110,7 +117,7 @@
 			}
 		}
 				
-		//resize image
+		//Resize image
 		function resizeImage( source:BitmapData, width:uint, height:uint, constrainProportions:Boolean = true ):BitmapData {
 			var IDEAL_RESIZE_PERCENT:Number = 0.5,
 				scaleX:Number = width/source.width,
@@ -128,7 +135,7 @@
 				return bitmapData;
 			}
 		
-			// scale it by the IDEAL for best quality
+			//Scale it by the IDEAL for best quality
 			var nextScaleX:Number = scaleX;
 			var nextScaleY:Number = scaleY;
 			while (nextScaleX < 1) nextScaleX /= IDEAL_RESIZE_PERCENT;

@@ -1,4 +1,10 @@
-﻿package libs
+﻿/*
+O3 Video Player Video Canvas
+libs.videoCanvas
+Created by Zoltan Lengyel-Fischer (2014)
+*/
+
+package libs
 {
 
 	import flash.display.MovieClip;
@@ -17,7 +23,7 @@
 
 		public var bufferTime:Number = 3;
 
-		// Double-buffering values for fast playback
+		//Double-buffering values for fast playback
 		public var loBufferTime:Number = 3;
 		public var hiBufferTime:Number = 15;
 
@@ -32,7 +38,7 @@
 		private var volume_:Number = 0.5;
 		private var soundTF_:SoundTransform = new SoundTransform();
 
-		//file meta data
+		//File meta data
 		private var videoMetaWidth_ = 0;
 		private var videoMetaHeight_ = 0;
 		public var videoMetaDuration = 0;		
@@ -47,21 +53,21 @@
 		public var stream_ns:NetStream = null;
 
 		private var bg:Sprite = new Sprite();//player bg
-		//private var bgColor:Number = 0xFF000000; //player bg color
+		//private var bgColor:Number = 0xFF000000;//player bg color
 		private var fsbgColor:Number = 0xFF000000;//player bg color
 
-		public function videoCanvas( width_, height_ )
-		{
-			//set dimension
+		//Constructor
+		public function videoCanvas( width_, height_ ) {
+			//Set dimension
 			this.width_ = width_;
 			this.height_ = height_;
 
-			this.addChild( this.bg );//ad bg layer
+			this.addChild( this.bg );//Ad bg layer
 			this.addChild( this.videoHolder );
 
 		}
 
-		//initialize player
+		//Initialize player
 		public function initPlayer()
 		{
 			if (this.autoplay_)
@@ -70,7 +76,7 @@
 			}
 		}
 
-		//set the video/audio file 
+		//Set the video/audio file 
 		public function setFile( file )
 		{
 			this.file_ = file;
@@ -78,13 +84,13 @@
 			//this.initPlayer();
 		}
 
-		//check if playing
+		//Check if playing
 		public function isPlaying():Boolean
 		{
 			return this.playing_;
 		}
 
-		//pause file
+		//Pause file
 		public function Pause()
 		{
 			this.playing_ = false;
@@ -94,7 +100,7 @@
 			} catch(e:Error){}				
 		}
 
-		//file end by playing
+		//File end by playing
 		public function Ended()
 		{
 			this.playing_ = false;
@@ -109,7 +115,7 @@
 			*/
 		}
 
-		//replay
+		//Replay
 		public function Replay()
 		{			
 			try{
@@ -118,7 +124,7 @@
 		}
 
 
-		//play file
+		//Play file
 		public var initStarted = false;
 		public function Play()
 		{
@@ -129,7 +135,7 @@
 				this.videoCreated = true;
 
 				var client:Object = new Object();
-				// Custom playback client
+				//Custom playback client
 				client.onBWDone = function(e){};
 				client.onMetaData = this.onMetaData_;
 				client.onCuePoint = function(e){};
@@ -140,7 +146,7 @@
 				//trace( this.streamServer );
 				this.connect_nc.connect( this.streamServer );
 				
-				//reset stream
+				//Reset stream
 				try{
 				  this.stream_ns.seek(0);
 				} catch(e:Error){}
@@ -215,14 +221,14 @@
 			}
 		}
 
-		//goto time
+		//Goto time
 		public function playFrom( sec:Number ) {
 			try {
 				this.stream_ns.seek( sec );			
 			} catch (err:Error) {}
 		}
 		
-		//goto time (percent)
+		//Goto time (percent)
 		public function playFromPercent( percent:Number ) {
 			try {
 				
@@ -237,10 +243,10 @@
 			} catch (err:Error) {}
 		}
 
-		//resize player
+		//Resize player
 		public function resize( width_, height_ )
 		{
-			//update dimension
+			//Update dimension
 			this.width_ = width_;
 			this.height_ = height_;
 
@@ -249,11 +255,12 @@
 			this.video.width = this.width_;
 			this.video.height = this.height_;
 
-			this.resizeVideo( this.videoMetaWidth_, this.videoMetaHeight_, this.width_, this.height_ );// resize video
-
+			//Resize video	
+			this.resizeVideo( this.videoMetaWidth_, this.videoMetaHeight_, this.width_, this.height_ );
+			
 		}
 
-		//resize video
+		//Resize video
 		private function resizeVideo( wfrom, hfrom, wto, hto )
 		{
 			var new_width = 0, 
@@ -262,7 +269,7 @@
 			width_pro = 0,
 			height_pro = 0;
 
-			// fit in the frame if the video resolution is bigger than the frame
+			//Fit in the frame if the video resolution is bigger than the frame
 			if (wfrom > hfrom)
 			{
 
@@ -308,32 +315,33 @@
 
 		}
 
-		//on meta data load
+		//On meta data load
 		private var videoMetaLoaded_:Boolean = false;
 		private function onMetaData_(info:Object):void
 		{				
 			this.videoMetaWidth_ = info.width;
 			this.videoMetaHeight_ = info.height;
 			this.videoMetaDuration = info.duration;
-			this.resizeVideo( this.videoMetaWidth_, this.videoMetaHeight_, this.width_, this.height_ );// resize video
+			//Resize video
+			this.resizeVideo( this.videoMetaWidth_, this.videoMetaHeight_, this.width_, this.height_ );
 			if ( !videoMetaLoaded_ ) {
 				videoMetaLoaded_ = true;
 				dispatchEvent( new Event('videoCreated') );
 			}
 		}
 
-		//video error hadnler
+		//Video error hadnler
 		function asyncErrorEventHandler( event:AsyncErrorEvent ):void
 		{
-			// ignore
+			//Ignore
 			trace(event);
 		}
 
-		//stream net status handler
+		//Stream net status handler
 		public var firstNetstream = false;
 		private function netStatusHandler( event:NetStatusEvent ):void
 		{	
-			//netstream event info before load
+			//Netstream event info before load
 			trace(event.info.code);
 			switch (event.info.code) {
 				case "NetStream.Play.StreamNotFound" :		
@@ -341,7 +349,7 @@
 					break;
 			}
 		
-			//netstream event info after load
+			//Netstream event info after load
 			if (this.firstNetstream)
 			{
 				switch (event.info.code)
@@ -407,14 +415,14 @@
 			*/
 		}
 
-		//set auto play
+		//Set auto play
 		public function setAutoPlay( val:Boolean = true )
 		{
 			this.autoplay_ = val;
 			//this.initPlayer();
 		}
 
-		//set/update background color
+		//Set/update background color
 		/*
 		public function setBackgroundColor( color:Number ) {
 		this.bgColor = color;
@@ -433,7 +441,7 @@
 		}
 		*/
 
-		//set/update background color
+		//Set/update background color
 		public function setFsBackgroundColor( color:Number )
 		{
 			this.fsbgColor = color;

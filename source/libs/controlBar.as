@@ -1,9 +1,15 @@
-﻿package libs {
+﻿/*
+O3 Video Player Control 
+libs.controlBar
+Created by Zoltan Lengyel-Fischer (2014)
+*/
 
+package libs {
+
+	import libs.Helvetica;
 	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-	import libs.Helvetica;
 	import flash.text.TextField;
 	import flash.text.AntiAliasType;
 	import flash.text.TextFormat;
@@ -18,7 +24,7 @@
 		public var width_:Number = 0;
 		public var height_:Number = 0;
 		
-		//bar bg color
+		//Bar bg color
 		private var bgColor:Number = 0x3c3c3c;
 		private var fillColor:Number = 0xfbfbfb;
 		private var toolBgColor:Number = 0x0b0b0b;
@@ -26,17 +32,14 @@
 		private var toolBorderColor:Number = 0x575757;
 		private var toolBufferBgColor:Number = 0x434343;		
 		private var toolBufferBorderColor:Number = 0x777777;				
-		
-		//left/right margin
-		private var margin:Number = 5;
-		
-		//left/right padding
+				
+		//Left/right padding
 		private var padding:Number = 10;
 				
-		//main bar
+		//Main bar
 		private var mainHolder:MovieClip = new MovieClip();
 		
-		//stop/play button
+		//Stop/play button
 		private var playBtn:MovieClip = new MovieClip();
 		private var playBtnWidth:Number = 18;
 		private var playBtnHeight:Number = 18;		
@@ -44,13 +47,13 @@
 		private var pauseBtnWidth:Number = 18;
 		private var pauseBtnHeight:Number = 18;
 		
-		//fullscreen button
+		//Fullscreen button
 		private var fullscreenBtn:MovieClip = new MovieClip();
 		private var fullscreenBtnWidth:Number = 18;
 		private var fullscreenBtnHeight:Number = 18;
 		private var fullscreen:Boolean = false;
 		
-		//seek control
+		//Seek control
 		private var seekControl:MovieClip = new MovieClip();
 		private var seekControlHeight:Number = 8;
 		private var seekControlWidth:Number = 70;
@@ -58,58 +61,59 @@
 		private var seekFullControl:MovieClip = new MovieClip();
 		private var seekFullControlMask:MovieClip = new MovieClip();
 		
-		//buffer control		
+		//Buffer control		
 		private var bufferControl:MovieClip = new MovieClip();
 		private var buffer:Number = 0; //buffer percent
 		private var bufferControlMask:MovieClip = new MovieClip();
 		
-		//seek nub
+		//Seek nub
 		private var seekNub:MovieClip = new MovieClip();
 		private var seekNubWidth:Number = 20;
 		private var seekNubHeight:Number = 12;
 		private var seekNubX:Number = 0;
 		
-		//volume control
+		//Volume control
 		private var volumeControl:MovieClip = new MovieClip();
 		private var volumeControlHeight:Number = 8;
 		private var volumeControlWidth:Number = 70;		
 		private var volumeControlMaxWidth:Number = 70;		
 		private var volume:Number = 0;
 		
-		//volume nub
+		//Volume nub
 		private var volumeNub:MovieClip = new MovieClip();
 		private var volumeNubRadius:Number = 6.2;
 		private var volumeNubX:Number = 0;
 		
-		//volume button
+		//Volume button
 		private var volumeBtn:MovieClip = new MovieClip();
 		private var volumeBtnWidth:Number = 22;
 		private var volumeBtnHeight:Number = 18;
 		
-		//timer display
+		//Timer display
 		private var timerText:TextField = new TextField();
 		private var timerTextHeight:Number = 18;		
 		private var time:Number = 0;
 		
-		//playing status
+		//Playing status
 		private var is_playing = false;
 		
-		//fade in/out effect
+		//Fade in/out effect
 		private var fadeInEffect:Object = null;
 		private var fadeOutEffect:Object = null;
 		
-		//fade flag, true if out, false if in
+		//Fade flag, true if out, false if in
 		private var is_faded = false;
 		
-		//disable flag, true if disabled, false if not
+		//Disable flag, true if disabled, false if not
 		private var is_disabled = false;
-
+	
+		//Constructor
 		public function controlBar( width_, height_ ) {
 																				
-			//create main holder
+			//Create main holder
 			this.addChild(mainHolder);
 			
-			//create buttons
+			//Create buttons
 			this.mainHolder.addChild(this.playBtn);
 			this.mainHolder.addChild(this.pauseBtn);
 			this.mainHolder.addChild(this.volumeBtn);
@@ -120,13 +124,13 @@
 			this.pauseBtn.addEventListener( MouseEvent.CLICK, function() { if ( !is_disabled ) dispatchEvent( new Event('pause') ); } );
 			this.volumeBtn.addEventListener( MouseEvent.CLICK, function() { if ( !is_disabled ) dispatchEvent( new Event('mute') ); } );
 
-			//fullscreen buttons
+			//Fullscreen buttons
 			this.mainHolder.addChild(this.fullscreenBtn);
 			this.fullscreenBtn.buttonMode = true;
 			this.fullscreenBtn.useHandCursor = false;
 			this.fullscreenBtn.addEventListener( MouseEvent.CLICK, function() { if ( !is_disabled ) dispatchEvent( new Event('fullscreen') ); } );
 			
-			//timers
+			//Timers
 			var textFormat:TextFormat = new TextFormat();
 			textFormat.font = "Helvetica";
 			textFormat.color = this.fillColor;
@@ -140,7 +144,7 @@
 			this.timerText.defaultTextFormat = textFormat;
 			this.mainHolder.addChild(this.timerText); 
 			
-			//volume control
+			//Colume control
 			this.mainHolder.addChild(this.volumeControl);
 			this.volumeControl.addEventListener( MouseEvent.MOUSE_DOWN, this.volumeControlMouseDown );
 			//this.volumeControl.addEventListener( MouseEvent.CLICK, this.volumeControlMouseClick );
@@ -154,21 +158,21 @@
 			var volumeNubFilter = new Array(); volumeNubFilter.push( shadowFilter );
 			this.volumeNub.filters = volumeNubFilter;
 			
-			//seek control
+			//Seek control
 			this.mainHolder.addChild(this.seekControl);
 			this.seekControl.addEventListener( MouseEvent.MOUSE_DOWN, this.seekControlMouseDown );
 			//this.seekControl.addEventListener( MouseEvent.MOUSE_UP, this.seekControlMouseUp );
 			//this.seekControl.addEventListener( MouseEvent.MOUSE_MOVE, this.seekControlMouseMove );
 			
-			//buffer
+			//Buffer
 			this.seekControl.addChild(this.bufferControl);
 			this.bufferControl.addChild(this.bufferControlMask);
 			this.bufferControl.mask = this.bufferControlMask;			
-			//filled
+			//Filled
 			this.seekControl.addChild(this.seekFullControl);
 			this.seekFullControl.addChild(this.seekFullControlMask);
 			this.seekFullControl.mask = this.seekFullControlMask;			
-			//nub
+			//Nub
 			this.seekControl.addChild(this.seekNub);
 			this.seekNub.graphics.beginFill( this.fillColor );
 			this.seekNub.graphics.drawRoundRect( 0, 0, this.seekNubWidth, this.seekNubHeight, 12, 12 );			
@@ -176,76 +180,28 @@
 			var seekNubFilter = new Array(); seekNubFilter.push( shadowFilter );
 			this.seekNub.filters = seekNubFilter;			
 			
-			//set dimension
+			//Set dimension
 			this.resize( width_, height_ );
 			
-			//clear timer
-			this.setTimer( 0 );
-			
-		}
-		
-		//set bg color
-		public function setBgColor( color:Number ) {
-			this.bgColor = color;			
-			//set dimension
-			this.resize( width_, height_ );
-		}
-		
-		//set bg color
-		public function setFillColor( color:Number ) {
-			this.fillColor = color;			
 			this.drawPlayButton();
 			this.drawPauseButton();
 			this.drawFullscreenButton();
 			this.drawSeekFullControl();
-		}
-		
-		//set tool bg color
-		public function setToolBgColor( color:Number ) {
-			this.toolBgColor = color;
 			this.drawVolumeControl();
-			this.drawSeekControl();			
-		}
-		
-		//set tool border color
-		public function setToolBorderColor( color:Number ) {
-			this.toolBorderColor = color;
-			this.drawVolumeControl();
-			this.drawSeekControl();
-		}		
-		
-		//set tool buffer bg color
-		public function setToolBufferBgColor( color:Number ) {
-			this.toolBufferBgColor = color;
-			this.drawBufferControl();			
-		}
-		
-		//set tool border color
-		public function setToolBufferBorderColor( color:Number ) {
-			this.toolBufferBorderColor = color;
+			this.drawSeekControl();	
 			this.drawBufferControl();
+			
+			//Clear timer
+			this.setTimer( 0 );
+			
 		}
 		
-		//set left/right margin
-		public function setMargin( margin:Number = 5 ) {
-			this.margin = margin; 			
-			//set dimension
-			this.resize( width_, height_ );
-		}
-		
-		//set left/right margin
-		public function setPadding( padding:Number = 10 ) {
-			this.padding = padding; 			
-			//set dimension
-			this.resize( width_, height_ );
-		}
-		
-		//set fullscreen flag
+		//Set fullscreen flag
 		public function setFullscreen( fullscreen ) {
 			this.fullscreen = fullscreen;
 		}
 		
-		//set timer
+		//Set timer
 		public function setTimer( time:Number = 0 ) {
 			this.time = time;			
 			var sec = 0, hour = 0, min = 0;
@@ -257,34 +213,34 @@
 							  ( sec > 9 ? sec.toString() : '0'+sec.toString() );
 		}		
 		
-		//reposition/resize object
+		//Reposition/resize object
 		public function resize( width:Number, height:Number ) {
 			this.width_ = width;
 			this.height_ = height;
 			
-			//draw background 
+			//Draw background 
 			mainHolder.graphics.clear();
 			mainHolder.graphics.beginFill(this.bgColor);
-			mainHolder.graphics.drawRoundRect(this.margin,0,this.width_-this.margin*2,this.height_,10,10);
+			mainHolder.graphics.drawRoundRect(0,0,this.width_,this.height_,10,10);
 			mainHolder.graphics.endFill();
 			
 			pauseBtn.y = playBtn.y = ( this.height_ - this.playBtnHeight ) / 2;
-			pauseBtn.x = playBtn.x = this.padding + this.margin;
+			pauseBtn.x = playBtn.x = this.padding;
 			
 			fullscreenBtn.y =( this.height_ - this.fullscreenBtnHeight ) / 2;
-			fullscreenBtn.x = this.width_ - ( this.padding + this.margin + this.fullscreenBtnHeight );
+			fullscreenBtn.x = this.width_ - ( this.padding + this.fullscreenBtnHeight );
 			
-			//sum the totla space needed not size changing controls
-			var widthUsed = ( this.padding + this.margin ) * 2 +
+			//Sum the totla space needed not size changing controls
+			var widthUsed = this.padding * 2 +
 							this.fullscreenBtnWidth + 
 							this.volumeBtnWidth + this.padding +
 							this.timerText.width + this.padding +
 							this.playBtnWidth + this.padding;
 			
-			//sum the total space remains for size changing tools
+			//Sum the total space remains for size changing tools
 			var widthRem = this.width_ - ( widthUsed + this.padding * 2 );						
 			
-			//fit elements on different player size
+			//Fit elements on different player size
 			if ( this.width_ < 220 ) {
 				seekControl.visible = false;
 			} else if ( this.width_ < 300 ) {
@@ -301,7 +257,7 @@
 				seekControl.visible = true;
 			}
 			
-			//position volume control
+			//Position volume control
 			volumeControl.x = this.fullscreenBtn.x - this.padding - this.volumeControlWidth;
 			volumeControl.y = ( this.height_ - this.volumeControlHeight ) / 2;
 			this.drawVolumeControl();
@@ -311,11 +267,11 @@
 			volumeBtn.y = ( this.height_ - this.volumeBtnHeight ) / 2;
 			volumeBtn.x = volumeControl.x - ( this.volumeControlWidth == 0 ? 0 : this.padding ) - this.volumeBtnWidth;
 			
-			//position timer
+			//Position timer
 			timerText.x = this.volumeBtn.x - this.padding - this.timerText.width;
 			timerText.y = ( this.height_ - this.timerText.height ) / 2;			
 			
-			//buffer & seek update
+			//Buffer & seek update
 			this.seekControl.x = playBtn.x + this.playBtnWidth + this.padding;
 			this.seekControl.y = ( this.height_ - this.seekControlHeight ) / 2;										
 			this.bufferControl.x = this.bufferControl.y = 0;
@@ -336,7 +292,7 @@
 			
 		}
 		
-		//draw play button
+		//Draw play button
 		function drawPlayButton() {			
 			
 			this.playBtn.graphics.clear();
@@ -353,7 +309,7 @@
 			this.playBtn.graphics.endFill();
 		}
 		
-		//draw pause button
+		//Draw pause button
 		function drawPauseButton() {
 			this.pauseBtn.graphics.clear();
 			
@@ -369,7 +325,7 @@
 			this.pauseBtn.graphics.endFill();
 		}
 		
-		//draw fullscreen button
+		//Draw fullscreen button
 		function drawFullscreenButton() {
 			this.fullscreenBtn.graphics.clear();
 			
@@ -398,7 +354,6 @@
 		}
 		
 		public function drawSeekFullControl() {
-			
 			
 			this.seekFullControl.graphics.clear();
 			
@@ -472,7 +427,7 @@
 			var x = ( this.volumeControlWidth - 2 * this.volumeNubRadius + 2 ) * this.volume + this.volumeNubRadius - 1;
 			this.volumeNub.x = x;
 						
-			//draw volume button
+			//Draw volume button
 			this.volumeBtn.graphics.clear();
 						
 			this.volumeBtn.graphics.beginFill( this.bgColor );
@@ -518,21 +473,21 @@
 			
 		}
 		
-		//show play
+		//Show play
 		public function playing() {
 			this.is_playing = true;
 			this.playBtn.visible = !this.is_playing;
 			this.pauseBtn.visible = this.is_playing;
 		}
 		
-		//show pause
+		//Show pause
 		public function paused() {
 			this.is_playing = false;
 			this.playBtn.visible = !this.is_playing;
 			this.pauseBtn.visible = this.is_playing;
 		}
 		
-		//fade controls in
+		//Fade controls in
 		public function fadeIn() {
 			if ( is_faded ) {				
 				this.is_faded = false;
@@ -545,7 +500,7 @@
 			}
 		};
 			
-		//fade controls out
+		//Fade controls out
 		public function fadeOut() {
 			if ( this.is_playing /*&& !this.fullscreen*/ ) {
 				if ( !is_faded ) {					
@@ -560,7 +515,7 @@
 			}
 		}
 		
-		//set the seek and redraw
+		//Set the seek and redraw
 		public function setSeek( seek:Number ) {
 			if ( this.seek != seek ) {
 				this.seek = seek;
@@ -568,12 +523,12 @@
 			}
 		}
 				
-		//get the seek and redraw
+		//Get the seek and redraw
 		public function getSeek() {
 			return this.seek;
 		}				
 		
-		//set the buffer and redraw
+		//Set the buffer and redraw
 		public function setBuffer( buffer:Number ) {
 			if ( this.buffer != buffer ) {
 				this.buffer = buffer;
@@ -581,23 +536,23 @@
 			}
 		}
 				
-		//get the buffer and redraw
+		//Get the buffer and redraw
 		public function getBuffer() {
 			return this.buffer;
 		}
 		
-		//set the volume and redraw
+		//Set the volume and redraw
 		public function setVolume( volume:Number ) {			
 			this.volume = volume;
 			drawVolumeControl();
 		}
 				
-		//get the volume and redraw
+		//Get the volume and redraw
 		public function getVolume() {
 			return this.volume;
 		}		
 	
-		//mouse down on volume control
+		//Mouse down on volume control
 		public function volumeControlMouseDown( event:MouseEvent ) {
 			if ( !is_disabled ) {
 				stage.addEventListener( Event.MOUSE_LEAVE, volumeControlMouseLeave );
@@ -611,7 +566,7 @@
 			}
 		}
 		
-		//mouse leave on volume control
+		//Mouse leave on volume control
 		public function volumeControlMouseLeave( event:Event ) {			
 			stage.removeEventListener( Event.MOUSE_LEAVE, volumeControlMouseLeave );
 			stage.removeEventListener( MouseEvent.MOUSE_MOVE, volumeControlMouseMove );
@@ -622,7 +577,7 @@
 			}
 		}
 		
-		//mouse up on volume control
+		//Mouse up on volume control
 		public function volumeControlMouseUp( event:MouseEvent ) {			
 			stage.removeEventListener( Event.MOUSE_LEAVE, volumeControlMouseLeave );
 			stage.removeEventListener( MouseEvent.MOUSE_MOVE, volumeControlMouseMove );
@@ -633,14 +588,14 @@
 			}
 		}
 		
-		//mouse move on volume control
+		//Mouse move on volume control
 		var volumeMouseMoving:Boolean = false;
 		public function volumeControlMouseMove( event:MouseEvent ) {
 			if  ( volumeMouseMoving ) 
 				volumeControlMouseEvent( event );
 		}
 		
-		//set volume from mouse event
+		//Set volume from mouse event
 		public function volumeControlMouseEvent( event:MouseEvent ) {			
 			var hit = event.stageX - ( x + this.volumeControl.x ),
 				min = 0,
@@ -652,7 +607,7 @@
 			dispatchEvent( new Event("volumeChange") );
 		}
 		
-		//mouse down on seek control
+		//Mouse down on seek control
 		public function seekControlMouseDown( event:MouseEvent ) {
 			if ( !is_disabled ) {
 				stage.addEventListener( Event.MOUSE_LEAVE, seekControlMouseLeave );
@@ -666,7 +621,7 @@
 			}
 		}
 		
-		//mouse leave on seek control
+		//Mouse leave on seek control
 		public function seekControlMouseLeave( event:Event ) {			
 			stage.removeEventListener( Event.MOUSE_LEAVE, seekControlMouseLeave );
 			stage.removeEventListener( MouseEvent.MOUSE_MOVE, seekControlMouseMove );
@@ -677,7 +632,7 @@
 			}
 		}
 		
-		//mouse up on seek control
+		//Mouse up on seek control
 		public function seekControlMouseUp( event:MouseEvent ) {			
 			stage.removeEventListener( Event.MOUSE_LEAVE, seekControlMouseLeave );
 			stage.removeEventListener( MouseEvent.MOUSE_MOVE, seekControlMouseMove );
@@ -688,14 +643,14 @@
 			}
 		}
 	
-		//mouse move on seek control
+		//Mouse move on seek control
 		var seekMouseMoving:Boolean = false;
 		public function seekControlMouseMove( event:MouseEvent ) {
 			if ( seekMouseMoving )
 				seekControlMouseEvent( event );
 		}
 		
-		//set seek from mouse event
+		//Set seek from mouse event
 		public function seekControlMouseEvent( event:MouseEvent ) {
 			var hit = event.stageX - ( x + this.seekControl.x ),
 				min = 0,
@@ -707,13 +662,13 @@
 			dispatchEvent( new Event("seekChange") );
 		}		
 		
-		//set the controls bar disabled/enabled
+		//Set the controls bar disabled/enabled
 		public function setDisabled( is_disabled:Boolean ) {			
 			this.is_disabled = is_disabled;
 			this.resize( this.width_, this.height_ );
 		}
 		
-		//get the disabled/enabled status
+		//Get the disabled/enabled status
 		public function getDisabled() {
 			return this.is_disabled;
 		}		

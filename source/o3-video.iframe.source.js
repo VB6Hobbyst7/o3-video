@@ -10,7 +10,7 @@
 
 /** o3video global config*/
 o3video_config = {
-	no_support_msg: 'Your web browser does not support the video tag or missing the codec for this video file.',
+	no_support_msg: 'Your browser does not support the video tag or missing the codec for this video file.',
 	script_uri: (function() {
 		         	var scripts = document.getElementsByTagName("script");
 					return scripts[scripts.length-1].src.match( /^(http.+\/)[^\/]+$/ )[1];
@@ -21,7 +21,7 @@ o3video = function( opts, container ) {
 
 	var self = this;
 
-	//for compatibility mode
+	//for compatibility mode 
 	var $ = jQuery;
 	
 	//options
@@ -30,33 +30,38 @@ o3video = function( opts, container ) {
 	}, opts );
 
 	//container
-	self.$container = $(container); 
-	self.container = self.$container.get(0);
+	self.container = $(container); 
 
 	//check for container	
-	if ( self.$container.length != 1 || !self.container )
-		return console.log('O3 Video: Container must not be empty!') || false;
+	if ( self.container.length != 1 || !self.container.get(0) )
+		return console.log('Container must not be empty!') || false;
 
 	//check for valid video container	
-	if ( self.$container.prop("tagName").toString().toUpperCase() != 'VIDEO' )
-		return console.log("O3 Video: Container's tagname is not video.") || false;
+	if ( self.container.prop("tagName").toString().toUpperCase() != 'VIDEO' )
+		return console.log("Container's tagname is not video.") || false;
 
 	//type of video player
 	self.type = ''; // html5, flash
 
-	//jQuery obj of div contaier
-	self.$div = null;
+	//jQuery obj of iframe contaier
+	self.$iframe = null;
 
-	//jQuery obj of div video
-	self.$div_vid = null;
+	//iframe container document
+	self.iframe_doc = null;
+	
+	//iframe container window
+	self.iframe_wnd = null;
 
-	//jQuery obj of div main
-	self.$div_main = null;
+	//jQuery obj of iframe video
+	self.$iframe_vid = null;
 
-	//jQuery obj of div overlay play button
+	//jQuery obj of iframe main
+	self.$iframe_main = null;
+
+	//jQuery obj of iframe overlay play button
 	self.$playbtn = null;
 
-	//jQuery obj of div no supported codec or player message
+	//jQuery obj of iframe no supported codec or player message
 	self.$no_support_msg = null;
 
 	//list of sources from original video
@@ -75,35 +80,33 @@ o3video = function( opts, container ) {
 	self.flash_src = '';
 
 	//store original video attributes
-	self.origin = { //check for muted, webkit dosn't supports the muted attribute, we need to check in the HTML code, @todo: regexp need to improved
-					controls: / controls/i.test(self.container.outerHTML), 
-					//controls: self.get_prop( self.$container, "controls", false ),
-					height: self.get_prop( self.$container, "height", 'auto' ),
-					loop: self.get_prop( self.$container, "loop", false ),
+	self.origin = { autoplay: self.get_prop( self.container, "autoplay", false ),
 					//check for muted, webkit dosn't supports the muted attribute, we need to check in the HTML code, @todo: regexp need to improved
-					muted: / muted/i.test(self.container.outerHTML), 
-					autoplay: / autoplay/i.test(self.container.outerHTML), 
-					poster: self.get_prop( self.$container, "poster", '' ),
-					preload: self.get_prop( self.$container, "preload", false ),
-					src: self.get_prop( self.$container, "src", '' ),
-					style: self.get_prop( self.$container, "style" ),
-					width: self.get_prop( self.$container, "width", 'auto' ),
-					height: self.get_prop( self.$container, "height", 'auto' ),
-					innerHTML: self.get_prop( self.$container, "innerHTML", '' ) };
+					controls: / controls/i.test(self.container.get(0).outerHTML), 
+					//controls: self.get_prop( self.container, "controls", false ),
+					height: self.get_prop( self.container, "height", 'auto' ),
+					loop: self.get_prop( self.container, "loop", false ),
+					//check for muted, webkit dosn't supports the muted attribute, we need to check in the HTML code, @todo: regexp need to improved
+					muted: / muted/i.test(self.container.get(0).outerHTML), 
+					poster: self.get_prop( self.container, "poster", '' ),
+					preload: self.get_prop( self.container, "preload", false ),
+					src: self.get_prop( self.container, "src", '' ),
+					width: self.get_prop( self.container, "width", 'auto' ),
+					innerHTML: self.get_prop( self.container, "innerHTML", '' ) };
 
 	/** Constructor */
-	self.constructor__ = function() {		
-
-		//create div
-		self.$div = $('<div></div>').insertAfter(self.$container).attr({
-			id: self.$container.prop("id"),			
-			style: self.$container.attr("style"),
-			'class': self.$container.attr("class")
-		}).css( { 
-					'display': self.$container.css("display") == 'inline' ? 'inline-block' : self.$container.css("display"),
-					'width': self.origin.style.width != '' ? self.origin.style.width : self.origin.width,
-					'height': self.origin.style.height != '' ? self.origin.style.height : self.origin.height
-		 		} );		
+	self.constructor__ = function() {	
+		
+		//create iframe
+		self.$iframe = $('<iframe frameborder="0" allowTransparency="true"></iframe>').insertAfter(self.container).attr({
+			id: self.container.prop("id"),
+			src: "about:blank",
+			width: self.origin.width,
+			height: self.origin.height,
+			allowfullscreen: true,
+			style: self.container.attr("style"),
+			'class': self.container.attr("class")		
+		}).css('overflow','hidden');
 
 		//get source
 		if ( self.origin.src != '' ) {
@@ -117,7 +120,7 @@ o3video = function( opts, container ) {
 		}
 
 		//get sources
-		self.$container.find('source').each(function(){
+		self.container.find('source').each(function(){
 			//get source's src + type, if no mime type defined try to get from the src 
 			var src = self.get_prop( $(this), 'src', '' ),
 				type = self.get_prop( $(this), 'type', self.ext2mime(src) ),
@@ -139,12 +142,15 @@ o3video = function( opts, container ) {
 		});
 
 		//get message for browsers that do not support the <video> element
-		var no_support_msg = self.get_prop( self.$container, "innerHTML", '' );
+		var no_support_msg = self.get_prop( self.container, "innerHTML", '' );
 		no_support_msg = $.trim(no_support_msg).length == 0 ? o3video_config.no_support_msg : no_support_msg;
-		
+
+		//stop loading the original video and remove it from DOM
+		self.container.src = false;		
+
 		//msie 8 and below do not support video tag, so we need to remove the video sibling by sibling from DOM
 		if ( /MSIE/i.test(navigator.userAgent) && parseFloat((navigator.userAgent.toLowerCase().match(/.*(?:rv|ie)[\/: ](.+?)([ \);]|$)/) || [])[1]) < 9 ) {			
-			var old_obj = self.container,
+			var old_obj = self.container.get(0),
 				rem_list = [];	
 			//get elements from inside the video
 			while ( old_obj.nextSibling && old_obj.nextSibling.tagName != '/VIDEO' )	{				
@@ -156,7 +162,7 @@ o3video = function( opts, container ) {
 					if ( !(/^(?:[a-z]+:)?\/\//i.test(self.flash_src)) ) //if the src is relative we need to convert to absolute
 						self.flash_src = window.location.protocol+'//'+window.location.hostname+window.location.pathname+self.flash_src											
 				}
-				if ( old_obj.tagName != 'DIV' )
+				if ( old_obj.tagName != 'IFRAME' )
 					rem_list.push( old_obj );
 			}
 			//get the video closeing element
@@ -166,28 +172,43 @@ o3video = function( opts, container ) {
 			//remove from DOM
 			for ( var i = 0 ; i < rem_list.length; i++ )
 				$(rem_list[i]).remove();
-		}	
+		}
 
-		//load o3-video css classes
-		self.addCSS2Head();
+		//remove video tag from DOM
+		self.container.remove();
 
-		//create div content
-		var myContent = '<div class="o3-video-fill_wnd o3-video-main">\
-						 	<a href="javascript:{}" class="o3-video-playbtn o3-video-transition"></a>\
-						 	<div class="o3-video-no_support_msg o3-video-transition o3-video-fill_wnd o3-video-absolute">'+no_support_msg+'</div>\
-						 </div>';
-		self.$div.html(myContent);
+		//create iframe content
+		var myContent = '<!DOCTYPE html>'
+		    + '<html><head>'
+		    + '<meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge">'
+		    + '<style type="text/css">'
+		    + 'body,html { padding: 0px; margin: 0px; overflow: hidden; background:transparent; }'
+		    + '.transition { -moz-transition: all 0.3s linear; -webkit-transition: all 0.3s linear; -o-transition: all 0.3s linear; transition: all 0.3s linear; } '
+		    + '.fill_wnd { display: block; position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; } '		    
+		    + '.playbtn { opacity: 1; visibility: visible; z-index: 10; pointer: cursor; position: absolute; left: 50%; right: 50%; top: 50%; bottom: 50%; margin-left: -46px; margin-top: -46px;  width: 93px; height: 94px; display: block; background-image: url('+self.opts.playButtonImage+'); background-position: center; background-repeat: no-repeat; -moz-transition: all 0.2s ease-in; -webkit-transition: all 0.2s ease-in; -o-transition: all 0.2s ease-in; transition: all 0.2s ease-in; border-radius: 45px; -webkit-border-radius: 45px; -moz-border-radius: 45px; }'
+		    + '.playbtn:hover { opacity: 0.6 }'
+		    + '.playbtn_hide { visibility: hidden; opacity: 0; -ms-transform: scale(2,2); -webkit-transform: scale(2,2); transform: scale(2,2); }'
+		    + '.no_support_msg { display: none; font-size: 14px; color: #000000; font-family: sans-serif; background: #FFFFFF; text-align: center; padding: 20px 0px 0px 0px; }'
+		    + '</style>'
+		    + '</head><body><div id="main" class="fill_wnd"><a href="javascript:{}" class="playbtn transition"></a><div class="no_support_msg transition fill_wnd">'+no_support_msg+'</div></div></body></html>';
 
+		//store iframe container window		    
+		self.iframe_wnd = self.$iframe.get(0).contentWindow;
 
-		//store div main 
-		self.$div_main = self.$div.find('.o3-video-main');
+		//store iframe container document and write in it	
+		self.iframe_doc = self.iframe_wnd.document;
+		self.iframe_doc.open('text/html', 'replace');
+		self.iframe_doc.write(myContent);
+		self.iframe_doc.close();
+
+		//store iframe main 
+		self.$iframe_main = $(self.iframe_doc).find('#main');
 
 		//get overlay play btn
-		var zIndex = self.container.style.zIndex;
-		self.$playbtn = self.$div.find('.o3-video-playbtn').css( 'z-index', zIndex != 'auto' ? parseInt(zIndex) + 100 : 1 );
-
+		self.$playbtn = $(self.iframe_doc).find('.playbtn');
+		
 		//get no support message holder
-		self.$no_support_msg = self.$div.find('.o3-video-no_support_msg');	
+		self.$no_support_msg = $(self.iframe_doc).find('.no_support_msg');	
 
 		//create overlay play btn
 		self.create_playbtn();
@@ -221,17 +242,6 @@ o3video = function( opts, container ) {
 		
 		}
 
-		
-		//stop loading the original video and remove it from DOM
-		self.$container.attr( 'src', '' );
-
-		//stop the video
-		if ( typeof self.container.pause == 'function' )
-			self.container.pause();		
-
-		//remove video tag from DOM
-		self.$container.remove();
-
 	};
 
 	//run constructor
@@ -247,17 +257,17 @@ o3video.prototype.hideOverlayPlayBtn = function( hide ) {
 	hide = typeof hide == 'undefined' ? true : hide; 
 	
 	if ( hide ) {
-		var btn = this.$playbtn.addClass('o3-video-playbtn_hide');
+		var btn = this.$playbtn.addClass('playbtn_hide');
 		setTimeout(function(){ btn.css('display','none'); },300);
 	} else {
-		this.$playbtn.css('display','block').removeClass('o3-video-playbtn_hide');		
+		this.$playbtn.css('display','block').removeClass('playbtn_hide');		
 	}
 }
 
 /** start/seek the video player */
 o3video.prototype.play = function() {
 	if ( this.type == 'html5' ) {
-		this.$div_vid.get(0).play();
+		this.$iframe_vid.get(0).play();
 	} else {
 		this.get_flash_ref().play();
 	}	
@@ -266,15 +276,15 @@ o3video.prototype.play = function() {
 /** start/seek the video player */
 o3video.prototype.pause = function() {
 	if ( this.type == 'html5' ) {
-		this.$div_vid.get(0).pause();
+		this.$iframe_vid.get(0).pause();
 	} else {
 		this.get_flash_ref().pause();
 	}
 };
 
-/** create and add overlay play button to the div */
+/** create and add overlay play button to the iframe */
 o3video.prototype.create_playbtn = function() {
-	//do not show overlay button if no supported codec or player, the autoplay attr is set or for some browsers has they own overlay play button.
+	//don show overlay button if no supported codec or player, the autoplay attr is set or for some browsers has they own overlay play button.
 	if ( this.origin.autoplay || /firefox/i.test(navigator.userAgent) || 
 		 /Nintendo/i.test(navigator.userAgent) || /iPod/i.test(navigator.userAgent) || /iPad/i.test(navigator.userAgent) || /iPhone/i.test(navigator.userAgent) || 
 		 /Windows Phone/i.test(navigator.userAgent) || /Android/i.test(navigator.userAgent) ) {
@@ -293,33 +303,17 @@ o3video.prototype.create_playbtn = function() {
 };
 
 
-/** 
-* Inject o3-video CSS classes to html head
-*/
-o3video.prototype.addCSS2Head = function() {
-	if ( jQuery('style[ref="o3-video-classes"]').length == 0 )
-		jQuery('head').prepend('<style type="text/css" ref="o3-video-classes">'		    				
-			    + '.o3-video-transition { -moz-transition: all 0.3s linear; -webkit-transition: all 0.3s linear; -o-transition: all 0.3s linear; transition: all 0.3s linear; } '
-			    + '.o3-video-fill_wnd { display: block; position: relative; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; } '		    
-			    + '.o3-video-absolute { position: absolute; } '
-			    + '.o3-video-playbtn { opacity: 1; visibility: visible; z-index: 10; pointer: cursor; position: absolute; left: 50%; right: 50%; top: 50%; bottom: 50%; margin-left: -46px; margin-top: -46px;  width: 93px; height: 94px; display: block; background-image: url('+this.opts.playButtonImage+'); background-position: center; background-repeat: no-repeat; -moz-transition: all 0.2s ease-in; -webkit-transition: all 0.2s ease-in; -o-transition: all 0.2s ease-in; transition: all 0.2s ease-in; border-radius: 45px; -webkit-border-radius: 45px; -moz-border-radius: 45px; }'
-			    + '.o3-video-playbtn:hover { opacity: 0.6 }'
-			    + '.o3-video-playbtn_hide { visibility: hidden; opacity: 0; -ms-transform: scale(2,2); -webkit-transform: scale(2,2); transform: scale(2,2); }'
-			    + '.o3-video-no_support_msg { display: none; font-size: 14px; color: #000000; font-family: sans-serif; background: #FFFFFF; text-align: center; padding: 20px 0px 0px 0px; }'			    
-			    + '</style>');
-};	
-
 /**
 *
 * @param string name Name of the object 
 */
 o3video.prototype.get_flash_ref = function() {	
-	var obj = typeof(document[this.flash_name+'_obj']) != undefined ? document[this.flash_name+'_obj'] : window[this.flash_name+'_obj'],
-		embed = typeof(document[this.flash_name+'_embed']) != undefined ? document[this.flash_name+'_embed'] : window[this.flash_name+'_embed'];		  
+	var obj = typeof(this.iframe_doc[this.flash_name+'_obj']) != undefined ? this.iframe_doc[this.flash_name+'_obj'] : this.iframe_wnd[this.flash_name+'_obj'],
+		embed = typeof(this.iframe_doc[this.flash_name+'_embed']) != undefined ? this.iframe_doc[this.flash_name+'_embed'] : this.iframe_wnd[this.flash_name+'_embed'];		  
 	return embed ? embed : obj;
 };
 
-/** create and add flash object to the div */
+/** create and add flash object to the iframe */
 o3video.prototype.create_flash = function() {
 	this.type = 'flash';
 	var flashvars = 'src='+this.flash_src
@@ -343,36 +337,36 @@ o3video.prototype.create_flash = function() {
 	 +'<param name="menu" value="true"></param>'
 	 +'<embed name="'+this.flash_name+'_embed" id="'+this.flash_name+'_embed"  src="'+o3video_config.script_uri+'../o3-video.flash.swf?'+Math.random()+'" type="application/x-shockwave-flash" allowscriptaccess="always"'
 	 +'wmode="transparent" menu="true" quality="high" allowfullscreen="true" width="100%" height="100%" flashvars="'+flashvars+'"></embed>'
-	 +'</object>').appendTo(this.$div_main);
+	 +'</object>').appendTo(this.$iframe_main);
 };
 
-/** create and add HTML5 video tag to the div */
+/** create and add HTML5 video tag to the iframe */
 o3video.prototype.create_video = function() {
 	var self = this;
 	this.type = 'html5';
 
-	//create div video object and copy original video properties
-	this.$div_vid = $('<video id="video" width="100%" height="100%"'
-						+ ( this.origin.autoplay ? ' autoplay="autoplay" ' : '' )
+	//create iframe video object and copy original video properties
+	this.$iframe_vid = $('<video id="video" width="100%" height="100%"'
+						+ ( this.origin.autoplay ? ' autoplay ' : '' )
 						+ ( this.origin.controls ? ' controls ' : '' )
 						+ ( this.origin.loop ? ' loop ' : '' )
 						+ ( this.origin.muted ? ' muted ' : '' )
 						+ ( this.origin.poster ? ' poster="'+this.origin.poster+'" ' : '' )
 						+ ( this.origin.preload ? ' preload="'+( this.origin.preload ? 'true' : 'false' )+'" ' : '' )
 						//+ ( src ? ' src="'+src+'" ' : '' )
-		 				+ ' >'+this.origin.innerHTML+'</video>').appendTo(this.$div_main);		
-
+		 				+ ' >'+this.origin.innerHTML+'</video>').appendTo(this.$iframe_main);		
+	 
 	//bugfix for chrome, force to reload the file
-	if ( typeof this.$div_vid.get(0).load == 'function' )
-		this.$div_vid.get(0).load();
-	
+	if ( typeof this.$iframe_vid.get(0).load == 'function' )
+		this.$iframe_vid.get(0).load();
+
 	if ( this.origin.poster ) {
-		this.$div_vid.get(0).poster = '';
-		this.$div_vid.get(0).poster = this.origin.poster;
+		this.$iframe_vid.get(0).poster = '';
+		this.$iframe_vid.get(0).poster = this.origin.poster;
 	}
 
 	//on playing hide overlay play btn
-	this.$div_vid.bind('playing',function(){ self.hideOverlayPlayBtn(); });
+	this.$iframe_vid.bind('playing',function(){ self.hideOverlayPlayBtn(); });
 
 };
 
@@ -428,7 +422,7 @@ o3video.prototype.get_flash_version = function() {
 
 
 /** 
-* Change mime string to file extension. E.g. video/mp4 -> mp4
+* Check jQuery object for property, if not exists return value
 * @param string filename Filename
 * @return mixed
 */
@@ -447,7 +441,7 @@ o3video.prototype.ext2mime = function( filename ) {
 */
 o3video.prototype.get_prop = function( $, prop_name, value ) {
 	return $.prop(prop_name) ? $.prop(prop_name) : value;
-};
+};	
 
 //create console if not exist
 console = typeof console != 'undefined' ? console : { log: function(){} };
@@ -458,10 +452,6 @@ console = typeof console != 'undefined' ? console : { log: function(){} };
 if ( typeof jQuery != 'undefined' ) {
 	jQuery.fn.o3video = function( opts ) {
 		
-		//check for containers	
-		if ( $(this).length == 0 )
-			return console.log('O3 Video: Container must not be empty!') || false;
-
 		//create objects
 		$(this).each( function() {
 			new o3video( opts, this )
@@ -470,5 +460,5 @@ if ( typeof jQuery != 'undefined' ) {
 		return this;
 	};
 } else {
-	console.log('O3 Video: jQuery missing!');
+	console.log('jQuery missing!');
 }
