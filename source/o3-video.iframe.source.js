@@ -10,12 +10,16 @@
 
 /** o3video global config*/
 o3video_config = {
-	no_support_msg: 'Your browser does not support the video tag or missing the codec for this video file.',
+	no_support_msg: 'Your web browser does not support the video tag or missing the codec for this video file.',
 	script_uri: (function() {
-		         	var scripts = document.getElementsByTagName("script");
-					return scripts[scripts.length-1].src.match( /^(http.+\/)[^\/]+$/ )[1];
-		        })()
-};
+		         	var scripts = document.getElementsByTagName("script"),
+		         		src = scripts[scripts.length - 1].src;		         	
+		         	if ( src.match( /^(http.+\/)[^\/]+$/ ) && src.match( /^(http.+\/)[^\/]+$/ ).length > 0 )
+		         		return src.match( /^(http.+\/)[^\/]+$/ )[1];		         					         	
+		         	//fix. for iframes
+         			return src.substring(0,src.lastIndexOf("/")+1);
+		        })()	
+}; 
 
 o3video = function( opts, container ) {
 
@@ -30,14 +34,15 @@ o3video = function( opts, container ) {
 	}, opts );
 
 	//container
-	self.container = $(container); 
+	self.$container = $(container); 
+	self.container = self.$container.get(0);
 
 	//check for container	
-	if ( self.container.length != 1 || !self.container.get(0) )
+	if ( self.$container.length != 1 || !self.$container.get(0) )
 		return console.log('Container must not be empty!') || false;
 
 	//check for valid video container	
-	if ( self.container.prop("tagName").toString().toUpperCase() != 'VIDEO' )
+	if ( self.$container.prop("tagName").toString().toUpperCase() != 'VIDEO' )
 		return console.log("Container's tagname is not video.") || false;
 
 	//type of video player
@@ -80,33 +85,35 @@ o3video = function( opts, container ) {
 	self.flash_src = '';
 
 	//store original video attributes
-	self.origin = { autoplay: self.get_prop( self.container, "autoplay", false ),
+	self.origin = { autoplay: self.get_prop( self.$container, "autoplay", false ),
 					//check for muted, webkit dosn't supports the muted attribute, we need to check in the HTML code, @todo: regexp need to improved
-					controls: / controls/i.test(self.container.get(0).outerHTML), 
-					//controls: self.get_prop( self.container, "controls", false ),
-					height: self.get_prop( self.container, "height", 'auto' ),
-					loop: self.get_prop( self.container, "loop", false ),
+					controls: / controls/i.test(self.$container.get(0).outerHTML), 
+					//controls: self.get_prop( self.$container, "controls", false ),
+					height: self.get_prop( self.$container, "height", 'auto' ),
+					loop: self.get_prop( self.$container, "loop", false ),
 					//check for muted, webkit dosn't supports the muted attribute, we need to check in the HTML code, @todo: regexp need to improved
-					muted: / muted/i.test(self.container.get(0).outerHTML), 
-					poster: self.get_prop( self.container, "poster", '' ),
-					preload: self.get_prop( self.container, "preload", false ),
-					src: self.get_prop( self.container, "src", '' ),
-					width: self.get_prop( self.container, "width", 'auto' ),
-					innerHTML: self.get_prop( self.container, "innerHTML", '' ) };
+					muted: / muted/i.test(self.$container.get(0).outerHTML), 
+					poster: self.get_prop( self.$container, "poster", '' ),
+					preload: self.get_prop( self.$container, "preload", false ),
+					src: self.get_prop( self.$container, "src", '' ),
+					width: self.get_prop( self.$container, "width", 'auto' ),
+					innerHTML: self.get_prop( self.$container, "innerHTML", '' ) };
 
 	/** Constructor */
 	self.constructor__ = function() {	
 		
 		//create iframe
-		self.$iframe = $('<iframe frameborder="0" allowTransparency="true"></iframe>').insertAfter(self.container).attr({
-			id: self.container.prop("id"),
+		self.$iframe = $('<iframe frameborder="0" allowTransparency="true"></iframe>').insertAfter(self.$container).attr({
+			id: self.$container.attr("id"),
 			src: "about:blank",
+			ref: self.$container.attr("ref"),
 			width: self.origin.width,
 			height: self.origin.height,
 			allowfullscreen: true,
-			style: self.container.attr("style"),
-			'class': self.container.attr("class")		
+			style: self.$container.attr("style"),
+			'class': self.$container.attr("class")		
 		}).css('overflow','hidden');
+		self.$iframe.get(0).o3video = self;			
 
 		//get source
 		if ( self.origin.src != '' ) {
@@ -120,7 +127,7 @@ o3video = function( opts, container ) {
 		}
 
 		//get sources
-		self.container.find('source').each(function(){
+		self.$container.find('source').each(function(){
 			//get source's src + type, if no mime type defined try to get from the src 
 			var src = self.get_prop( $(this), 'src', '' ),
 				type = self.get_prop( $(this), 'type', self.ext2mime(src) ),
@@ -142,15 +149,15 @@ o3video = function( opts, container ) {
 		});
 
 		//get message for browsers that do not support the <video> element
-		var no_support_msg = self.get_prop( self.container, "innerHTML", '' );
+		var no_support_msg = self.get_prop( self.$container, "innerHTML", '' );
 		no_support_msg = $.trim(no_support_msg).length == 0 ? o3video_config.no_support_msg : no_support_msg;
 
 		//stop loading the original video and remove it from DOM
-		self.container.src = false;		
+		self.$container.src = false;		
 
 		//msie 8 and below do not support video tag, so we need to remove the video sibling by sibling from DOM
 		if ( /MSIE/i.test(navigator.userAgent) && parseFloat((navigator.userAgent.toLowerCase().match(/.*(?:rv|ie)[\/: ](.+?)([ \);]|$)/) || [])[1]) < 9 ) {			
-			var old_obj = self.container.get(0),
+			var old_obj = self.$container.get(0),
 				rem_list = [];	
 			//get elements from inside the video
 			while ( old_obj.nextSibling && old_obj.nextSibling.tagName != '/VIDEO' )	{				
@@ -175,7 +182,7 @@ o3video = function( opts, container ) {
 		}
 
 		//remove video tag from DOM
-		self.container.remove();
+		self.$container.remove();
 
 		//create iframe content
 		var myContent = '<!DOCTYPE html>'
@@ -199,7 +206,7 @@ o3video = function( opts, container ) {
 		self.iframe_doc = self.iframe_wnd.document;
 		self.iframe_doc.open('text/html', 'replace');
 		self.iframe_doc.write(myContent);
-		self.iframe_doc.close();
+		self.iframe_doc.close();		
 
 		//store iframe main 
 		self.$iframe_main = $(self.iframe_doc).find('#main');
@@ -269,7 +276,7 @@ o3video.prototype.play = function() {
 	if ( this.type == 'html5' ) {
 		this.$iframe_vid.get(0).play();
 	} else {
-		this.get_flash_ref().play();
+		this.get_flash_ref().js_play();
 	}	
 };
 
@@ -278,7 +285,7 @@ o3video.prototype.pause = function() {
 	if ( this.type == 'html5' ) {
 		this.$iframe_vid.get(0).pause();
 	} else {
-		this.get_flash_ref().pause();
+		this.get_flash_ref().js_pause();
 	}
 };
 
@@ -307,7 +314,7 @@ o3video.prototype.create_playbtn = function() {
 *
 * @param string name Name of the object 
 */
-o3video.prototype.get_flash_ref = function() {	
+o3video.prototype.get_flash_ref = function() {
 	var obj = typeof(this.iframe_doc[this.flash_name+'_obj']) != undefined ? this.iframe_doc[this.flash_name+'_obj'] : this.iframe_wnd[this.flash_name+'_obj'],
 		embed = typeof(this.iframe_doc[this.flash_name+'_embed']) != undefined ? this.iframe_doc[this.flash_name+'_embed'] : this.iframe_wnd[this.flash_name+'_embed'];		  
 	return embed ? embed : obj;
@@ -327,17 +334,22 @@ o3video.prototype.create_flash = function() {
 	//create flash object name
 	this.flash_name = 'o3f'+Math.random().toString().replace('.','');
 	
-	$('<object name="'+this.flash_name+'_obj" id="'+this.flash_name+'_obj" width="100%" height="100%">'
-	 +'<param name="movie" value="'+o3video_config.script_uri+'../o3-video.flash.swf?'+Math.random()+'"></param>'
-	 +'<param name="flashvars" value="'+flashvars+'"></param>'
-	 +'<param name="allowFullScreen" value="true"></param>'
-	 +'<param name="allowscriptaccess" value="always"></param>'
-	 +'<param name="quality" value="hight"></param>'
-	 +'<param name="wmode" value="transparent"></param>'
-	 +'<param name="menu" value="true"></param>'
-	 +'<embed name="'+this.flash_name+'_embed" id="'+this.flash_name+'_embed"  src="'+o3video_config.script_uri+'../o3-video.flash.swf?'+Math.random()+'" type="application/x-shockwave-flash" allowscriptaccess="always"'
-	 +'wmode="transparent" menu="true" quality="high" allowfullscreen="true" width="100%" height="100%" flashvars="'+flashvars+'"></embed>'
-	 +'</object>').appendTo(this.$iframe_main);
+
+	var embed = '<embed name="'+this.flash_name+'_embed" id="'+this.flash_name+'_embed"  src="'+o3video_config.script_uri+'../o3-video.flash.swf?'+Math.random()+'" type="application/x-shockwave-flash" allowscriptaccess="always"\
+				wmode="transparent" menu="true" quality="high" allowfullscreen="true" width="100%" height="100%" flashvars="'+flashvars+'"></embed>',
+		object = '<object name="'+this.flash_name+'_obj" id="'+this.flash_name+'_obj" height="100%" width="100%" '+( /MSIE/i.test(navigator.userAgent) ? ' classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" ' : '' )+'>\
+				 <param name="movie" value="'+o3video_config.script_uri+'../o3-video.flash.swf?'+Math.random()+'"></param>\
+				 <param name="flashvars" value="'+flashvars+'"></param>\
+				 <param name="allowFullScreen" value="true"></param>\
+				 <param name="allowscriptaccess" value="always"></param>\
+				 <param name="quality" value="hight"></param>\
+				 <param name="wmode" value="transparent"></param>\
+				 <param name="menu" value="true"></param>'
+				 + embed
+				 +'</object>';
+
+	//add only embed code on Miscrosoft IE
+	jQuery( object ).appendTo(this.$iframe_main);
 };
 
 /** create and add HTML5 video tag to the iframe */
@@ -352,14 +364,24 @@ o3video.prototype.create_video = function() {
 						+ ( this.origin.loop ? ' loop ' : '' )
 						+ ( this.origin.muted ? ' muted ' : '' )
 						+ ( this.origin.poster ? ' poster="'+this.origin.poster+'" ' : '' )
-						+ ( this.origin.preload ? ' preload="'+( this.origin.preload ? 'true' : 'false' )+'" ' : '' )
+						+ ( this.origin.preload ? ' preload="'+this.origin.preload+'" ' : '' )
 						//+ ( src ? ' src="'+src+'" ' : '' )
 		 				+ ' >'+this.origin.innerHTML+'</video>').appendTo(this.$iframe_main);		
 	 
+	//fix for chrome
+	//chrome player becomeing broken if the source is allready was loaded in a video tag before or in another iframe/tab
+	//only in chrome we add random to same sources
+	if ( /Chrome/i.test(navigator.userAgent) ) 
+		this.$iframe_vid.find('source').each(function(){
+			var src = jQuery(this).attr('src');
+			if ( src )
+				jQuery(this).attr('src',src += (src.split('?')[1] ? '&' : '?' )+Math.random());
+		});
+
 	//bugfix for chrome, force to reload the file
 	if ( typeof this.$iframe_vid.get(0).load == 'function' )
 		this.$iframe_vid.get(0).load();
-
+	
 	if ( this.origin.poster ) {
 		this.$iframe_vid.get(0).poster = '';
 		this.$iframe_vid.get(0).poster = this.origin.poster;
@@ -452,13 +474,32 @@ console = typeof console != 'undefined' ? console : { log: function(){} };
 if ( typeof jQuery != 'undefined' ) {
 	jQuery.fn.o3video = function( opts ) {
 		
+		//check for containers	
+		if ( jQuery(this).length == 0 )
+			return console.log('O3 Video: Container must not be empty!') || false;
+
+		//return object with list of o3videos
+		var o3video_array = {
+			o3videos: new Array(),
+			play: function() {
+				for (var i = 0;i<this.o3videos.length;i++)
+					this.o3videos[i].play();
+			},
+			pause: function() {
+				for (var i = 0;i<this.o3videos.length;i++)
+					this.o3videos[i].pause();	
+			}
+		};
+
 		//create objects
-		$(this).each( function() {
-			new o3video( opts, this )
-		});
+		jQuery(this).each( function() {
+			if ( typeof jQuery(this).get(0).o3video == 'undefined' )
+				jQuery(this).get(0).o3video = new o3video( opts, this );
+			o3video_array.o3videos.push( jQuery(this).get(0).o3video );
+		});	
 		
-		return this;
+		return o3video_array;
 	};
 } else {
-	console.log('jQuery missing!');
+	console.log('O3 Video: jQuery missing!');
 }
