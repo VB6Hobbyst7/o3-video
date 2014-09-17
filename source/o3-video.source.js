@@ -12,10 +12,14 @@
 o3video_config = {
 	no_support_msg: 'Your web browser does not support the video tag or missing the codec for this video file.',
 	script_uri: (function() {
-		         	var scripts = document.getElementsByTagName("script");
-					return scripts[scripts.length-1].src.match( /^(http.+\/)[^\/]+$/ )[1];
-		        })()
-};
+		         	var scripts = document.getElementsByTagName("script"),
+		         		src = scripts[scripts.length - 1].src;		         	
+		         	if ( src.match( /^(http.+\/)[^\/]+$/ ) && src.match( /^(http.+\/)[^\/]+$/ ).length > 0 )
+		         		return src.match( /^(http.+\/)[^\/]+$/ )[1];		         					         	
+		         	//fix. for iframes
+         			return src.substring(0,src.lastIndexOf("/")+1);
+		        })()	
+}; 
 
 o3video = function( opts, container ) {
 
@@ -84,7 +88,7 @@ o3video = function( opts, container ) {
 					muted: / muted/i.test(self.container.outerHTML), 
 					autoplay: / autoplay/i.test(self.container.outerHTML), 
 					poster: self.get_prop( self.$container, "poster", '' ),
-					preload: self.get_prop( self.$container, "preload", false ),
+					preload: self.get_prop( self.$container, "preload", 'none' ),
 					src: self.get_prop( self.$container, "src", '' ),
 					style: self.get_prop( self.$container, "style" ),
 					width: self.get_prop( self.$container, "width", 'auto' ),
@@ -98,12 +102,14 @@ o3video = function( opts, container ) {
 		self.$div = $('<div></div>').insertAfter(self.$container).attr({
 			id: self.$container.prop("id"),			
 			style: self.$container.attr("style"),
+			ref: self.$container.attr("ref"),
 			'class': self.$container.attr("class")
 		}).css( { 
 					'display': self.$container.css("display") == 'inline' ? 'inline-block' : self.$container.css("display"),
-					'width': self.origin.style.width != '' ? self.origin.style.width : self.origin.width,
-					'height': self.origin.style.height != '' ? self.origin.style.height : self.origin.height
-		 		} );		
+					'width': self.origin.style && self.origin.style.width != '' ? self.origin.style.width : self.origin.width,
+					'height': self.origin.style && self.origin.style.height != '' ? self.origin.style.height : self.origin.height
+		 		} );
+		self.$div.get(0).o3video = self;			
 
 		//get source
 		if ( self.origin.src != '' ) {
@@ -121,8 +127,8 @@ o3video = function( opts, container ) {
 			//get source's src + type, if no mime type defined try to get from the src 
 			var src = self.get_prop( $(this), 'src', '' ),
 				type = self.get_prop( $(this), 'type', self.ext2mime(src) ),
-				has_codec = self.is_codec_video(type);
-			
+				has_codec = self.is_codec_video(type);				
+
 			//update codec was found for source  
 			if ( has_codec )
 				self.codec_exists = true;
@@ -231,6 +237,7 @@ o3video = function( opts, container ) {
 
 		//remove video tag from DOM
 		self.$container.remove();
+		//self.$container.css('display','none');
 
 	};
 
@@ -259,7 +266,7 @@ o3video.prototype.play = function() {
 	if ( this.type == 'html5' ) {
 		this.$div_vid.get(0).play();
 	} else {
-		this.get_flash_ref().play();
+		this.get_flash_ref().js_play();
 	}	
 };
 
@@ -268,7 +275,7 @@ o3video.prototype.pause = function() {
 	if ( this.type == 'html5' ) {
 		this.$div_vid.get(0).pause();
 	} else {
-		this.get_flash_ref().pause();
+		this.get_flash_ref().js_pause();
 	}
 };
 
@@ -300,12 +307,12 @@ o3video.prototype.addCSS2Head = function() {
 	if ( jQuery('style[ref="o3-video-classes"]').length == 0 )
 		jQuery('head').prepend('<style type="text/css" ref="o3-video-classes">'		    				
 			    + '.o3-video-transition { -moz-transition: all 0.3s linear; -webkit-transition: all 0.3s linear; -o-transition: all 0.3s linear; transition: all 0.3s linear; } '
-			    + '.o3-video-fill_wnd { display: block; position: relative; left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; } '		    
-			    + '.o3-video-absolute { position: absolute; } '
+			    + '.o3-video-fill_wnd { display: block !important; position: relative !important; left: 0px !important; top: 0px !important; width: 100% !important; height: 100% !important; overflow: hidden !important; } '		    
+			    + '.o3-video-absolute { position: absolute !important; } '
 			    + '.o3-video-playbtn { opacity: 1; visibility: visible; z-index: 10; pointer: cursor; position: absolute; left: 50%; right: 50%; top: 50%; bottom: 50%; margin-left: -46px; margin-top: -46px;  width: 93px; height: 94px; display: block; background-image: url('+this.opts.playButtonImage+'); background-position: center; background-repeat: no-repeat; -moz-transition: all 0.2s ease-in; -webkit-transition: all 0.2s ease-in; -o-transition: all 0.2s ease-in; transition: all 0.2s ease-in; border-radius: 45px; -webkit-border-radius: 45px; -moz-border-radius: 45px; }'
-			    + '.o3-video-playbtn:hover { opacity: 0.6 }'
+			    + '.o3-video-playbtn:hover { opacity: 0.6; }'
 			    + '.o3-video-playbtn_hide { visibility: hidden; opacity: 0; -ms-transform: scale(2,2); -webkit-transform: scale(2,2); transform: scale(2,2); }'
-			    + '.o3-video-no_support_msg { display: none; font-size: 14px; color: #000000; font-family: sans-serif; background: #FFFFFF; text-align: center; padding: 20px 0px 0px 0px; }'			    
+			    + '.o3-video-no_support_msg { display: none !important; font-size: 14px; color: #000000; font-family: sans-serif; background: #FFFFFF; text-align: center; padding: 20px 0px 0px 0px; }'			    
 			    + '</style>');
 };	
 
@@ -315,7 +322,7 @@ o3video.prototype.addCSS2Head = function() {
 */
 o3video.prototype.get_flash_ref = function() {	
 	var obj = typeof(document[this.flash_name+'_obj']) != undefined ? document[this.flash_name+'_obj'] : window[this.flash_name+'_obj'],
-		embed = typeof(document[this.flash_name+'_embed']) != undefined ? document[this.flash_name+'_embed'] : window[this.flash_name+'_embed'];		  
+		embed = typeof(document[this.flash_name+'_embed']) != undefined ? document[this.flash_name+'_embed'] : window[this.flash_name+'_embed'];					
 	return embed ? embed : obj;
 };
 
@@ -333,17 +340,22 @@ o3video.prototype.create_flash = function() {
 	//create flash object name
 	this.flash_name = 'o3f'+Math.random().toString().replace('.','');
 	
-	$('<object name="'+this.flash_name+'_obj" id="'+this.flash_name+'_obj" width="100%" height="100%">'
-	 +'<param name="movie" value="'+o3video_config.script_uri+'../o3-video.flash.swf?'+Math.random()+'"></param>'
-	 +'<param name="flashvars" value="'+flashvars+'"></param>'
-	 +'<param name="allowFullScreen" value="true"></param>'
-	 +'<param name="allowscriptaccess" value="always"></param>'
-	 +'<param name="quality" value="hight"></param>'
-	 +'<param name="wmode" value="transparent"></param>'
-	 +'<param name="menu" value="true"></param>'
-	 +'<embed name="'+this.flash_name+'_embed" id="'+this.flash_name+'_embed"  src="'+o3video_config.script_uri+'../o3-video.flash.swf?'+Math.random()+'" type="application/x-shockwave-flash" allowscriptaccess="always"'
-	 +'wmode="transparent" menu="true" quality="high" allowfullscreen="true" width="100%" height="100%" flashvars="'+flashvars+'"></embed>'
-	 +'</object>').appendTo(this.$div_main);
+
+	var embed = '<embed name="'+this.flash_name+'_embed" id="'+this.flash_name+'_embed"  src="'+o3video_config.script_uri+'../o3-video.flash.swf?'+Math.random()+'" type="application/x-shockwave-flash" allowscriptaccess="always"\
+				wmode="transparent" menu="true" quality="high" allowfullscreen="true" width="100%" height="100%" flashvars="'+flashvars+'"></embed>',
+		object = '<object name="'+this.flash_name+'_obj" id="'+this.flash_name+'_obj" height="100%" width="100%" '+( /MSIE/i.test(navigator.userAgent) ? ' classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" ' : '' )+'>\
+				 <param name="movie" value="'+o3video_config.script_uri+'../o3-video.flash.swf?'+Math.random()+'"></param>\
+				 <param name="flashvars" value="'+flashvars+'"></param>\
+				 <param name="allowFullScreen" value="true"></param>\
+				 <param name="allowscriptaccess" value="always"></param>\
+				 <param name="quality" value="hight"></param>\
+				 <param name="wmode" value="transparent"></param>\
+				 <param name="menu" value="true"></param>'
+				 + embed
+				 +'</object>';
+
+	//add only embed code on Miscrosoft IE
+	jQuery( object ).appendTo(this.$div_main);
 };
 
 /** create and add HTML5 video tag to the div */
@@ -352,15 +364,25 @@ o3video.prototype.create_video = function() {
 	this.type = 'html5';
 
 	//create div video object and copy original video properties
-	this.$div_vid = $('<video id="video" width="100%" height="100%"'
+	this.$div_vid = jQuery('<video id="video" width="100%" height="100%"'
 						+ ( this.origin.autoplay ? ' autoplay="autoplay" ' : '' )
 						+ ( this.origin.controls ? ' controls ' : '' )
 						+ ( this.origin.loop ? ' loop ' : '' )
 						+ ( this.origin.muted ? ' muted ' : '' )
 						+ ( this.origin.poster ? ' poster="'+this.origin.poster+'" ' : '' )
-						+ ( this.origin.preload ? ' preload="'+( this.origin.preload ? 'true' : 'false' )+'" ' : '' )
+						+ ( this.origin.preload ? ' preload="'+this.origin.preload+'" ' : '' )
 						//+ ( src ? ' src="'+src+'" ' : '' )
-		 				+ ' >'+this.origin.innerHTML+'</video>').appendTo(this.$div_main);		
+		 				+ ' >'+this.origin.innerHTML+'</video>').appendTo(this.$div_main);
+
+	//fix for chrome
+	//chrome player becomeing broken if the source is allready was loaded in a video tag before or in another iframe/tab
+	//only in chrome we add random to same sources
+	if ( /Chrome/i.test(navigator.userAgent) ) 
+		this.$div_vid.find('source').each(function(){
+			var src = jQuery(this).attr('src');
+			if ( src )
+				jQuery(this).attr('src',src += (src.split('?')[1] ? '&' : '?' )+Math.random());
+		});
 
 	//bugfix for chrome, force to reload the file
 	if ( typeof this.$div_vid.get(0).load == 'function' )
@@ -384,7 +406,7 @@ o3video.prototype.create_video = function() {
 o3video.prototype.is_codec_video = function( mime ) {
 	//check for html5 video support
 	if ( !!document.createElement('video').canPlayType ) {
-		var video = document.createElement("video");
+		var video = document.createElement("video");		
 		switch ( mime ) {
 			case 'video/mp4':
 				return video.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
@@ -459,15 +481,30 @@ if ( typeof jQuery != 'undefined' ) {
 	jQuery.fn.o3video = function( opts ) {
 		
 		//check for containers	
-		if ( $(this).length == 0 )
+		if ( jQuery(this).length == 0 )
 			return console.log('O3 Video: Container must not be empty!') || false;
 
+		//return object with list of o3videos
+		var o3video_array = {
+			o3videos: new Array(),
+			play: function() {
+				for (var i = 0;i<this.o3videos.length;i++)
+					this.o3videos[i].play();
+			},
+			pause: function() {
+				for (var i = 0;i<this.o3videos.length;i++)
+					this.o3videos[i].pause();	
+			}
+		};
+
 		//create objects
-		$(this).each( function() {
-			new o3video( opts, this )
-		});
+		jQuery(this).each( function() {
+			if ( typeof jQuery(this).get(0).o3video == 'undefined' )
+				jQuery(this).get(0).o3video = new o3video( opts, this );
+			o3video_array.o3videos.push( jQuery(this).get(0).o3video );
+		});	
 		
-		return this;
+		return o3video_array;
 	};
 } else {
 	console.log('O3 Video: jQuery missing!');

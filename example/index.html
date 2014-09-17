@@ -33,14 +33,15 @@
     </style>
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.0/jquery.min.js"></script>
-    <script src="../source/o3-video.source.js?1"></script>
+    <script src="../source/o3-video.source.js"></script>
     <script type="text/javascript">
 
         (function($) {
             $(document).ready(function () {                 
                 
-             $('video').o3video();
-            
+            $('[ref="o3_video"]').o3video();
+                        
+
             });
         })(jQuery);
         
@@ -51,22 +52,27 @@
 
 	<h1>O3 video example</h1>
 
-    <video width="540" height="380" muted loop id="video1" controls class="" poster="poster1.jpg" style="background: #FF0000; z-index: 100;">
-        <source src="video1.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-     
+    <p>
+        <video width="540" height="380" muted loop id="video1" ref="o3_video" controls class="resp_player" poster="video1.jpg" style="background: #FF0000; z-index: 100;">
+            <source src="video1.mp4" type="video/mp4">            
+            Your browser does not support the video tag.
+        </video>             
+    </p>
+
     <input type="button" value="+" onclick="$('#video1').width($('#video1').width()+30); $('#video1').height($('#video1').height()+30);">
     <input type="button" value="-" onclick="$('#video1').width($('#video1').width()-30); $('#video1').height($('#video1').height()-30);">
+
+    <input type="button" value="Play" onclick="$('[ref=\'o3_video\']').o3video().play()">
+    <input type="button" value="Pause" onclick="$('[ref=\'o3_video\']').o3video().pause()">
 
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam malesuada urna tellus. Donec mattis nec mauris sit amet commodo. Ut commodo, nisi eget suscipit pulvinar, ipsum leo facilisis est, nec interdum nisl enim nec elit. Phasellus felis risus, auctor eu vestibulum et, semper nec metus. Maecenas sed eleifend arcu, non placerat orci. Ut turpis arcu, volutpat a turpis a, bibendum cursus eros. Quisque nibh metus, cursus ac odio in, tristique vehicula tellus. Vivamus varius urna mi, eu eleifend enim vestibulum nec. Morbi volutpat lorem tristique velit iaculis varius. Nam ac leo ante. Curabitur vitae erat ante. Ut pretium mattis euismod. Sed rutrum sagittis urna a luctus. Nullam porta tellus porttitor sapien placerat, nec adipiscing augue bibendum. Donec vitae consequat magna. Quisque in ante imperdiet, consectetur neque sed, commodo nisi.</p>
 
     <p>
 
-    <input type="button" value="Show/hide" onclick="$('#video2').css('display', $('#video2').css('display') == 'none' ? 'block' : 'none' )" style="float: right;">
+    <input type="button" value="Show/hide" onclick="$('#video0').css('display', $('#video0').css('display') == 'none' ? 'block' : 'none' )" style="float: right;">
 
-    <video width="240" height="180" id="video2" controls muted poster="poster2.jpg" class="float_player">
-        <source src="video2.mp4" type="video/mp4">
+    <video width="240" height="180" id="video0" ref="o3_video" controls muted poster="video0.png" class="float_player">
+        <source src="video0.mp4" type="video/mp4">
     </video> 
 
     Nam pharetra lobortis sem a consequat. Sed lacinia vitae nunc sit amet porttitor. Etiam interdum tempor interdum. Duis vulputate tincidunt velit ut rutrum. Quisque sit amet quam pulvinar tellus pharetra adipiscing. Fusce imperdiet rutrum ante, non vehicula diam fringilla non. Donec ut tempor ipsum, quis malesuada lorem. Suspendisse accumsan sed ligula at egestas. Nam rutrum lacus nisi, non rutrum ligula mattis non. Sed tempus est nisl, ac blandit sapien sagittis eget. Fusce dictum malesuada mi, ac imperdiet diam tempus at.</p>
