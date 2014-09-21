@@ -16,7 +16,7 @@
 
 Scan this QR code for live demo on your phone or table:
 
-![](//o3-video.s3.amazonaws.com/qr.png)
+![](http://o3-video.s3.amazonaws.com/qr.png)
 
 ## Sample Code
 
