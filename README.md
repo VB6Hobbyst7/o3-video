@@ -1,5 +1,4 @@
 # o3-video - HTML5 / Adobe Flash Video Player
-========
 
 > o3-video is a HTML5 video player built on the web browser's basic HTML5 player and a small Adobe Flash video player. It supports video playback on desktops and mobile devices.
 
@@ -16,6 +15,7 @@
 [Click here for live demo](http://d1gsaguqqln0jq.cloudfront.net/demo.html)
 
 Scan this QR code for live demo on your phone or table:
+
 ![](http://d1gsaguqqln0jq.cloudfront.net/qr.png)
 
 ## Sample Code
