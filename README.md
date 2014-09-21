@@ -25,7 +25,7 @@ Scan this QR code for live demo on your phone or table:
 <head>
 	<title>o3-video Sample Code</title>	
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-	<script src="//raw.githubusercontent.com/zoli-fischer/o3-video/master/o3-video.min.js"></script>
+	<script src="o3-video/o3-video.min.js"></script>
 	<script type="text/javascript">
 	    (function($) {
 	        $(document).ready(function () {                             
