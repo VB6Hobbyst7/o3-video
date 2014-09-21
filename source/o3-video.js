@@ -5,21 +5,56 @@
 * Released under the MIT license
 *
 * @author Zoltan Fischer 
+* @project https://github.com/zoli-fischer/o3-video 
 * @license https://github.com/zoli-fischer/o3-video/blob/master/LICENSE
 */
 
 /** o3video global config*/
-o3video_config = {
-	no_support_msg: 'Your web browser does not support the video tag or missing the codec for this video file.',
-	script_uri: (function() {
+var o3video_config = (function() {
+	this.script_uri = (function() {
 		         	var scripts = document.getElementsByTagName("script"),
 		         		src = scripts[scripts.length - 1].src;		         	
 		         	if ( src.match( /^(http.+\/)[^\/]+$/ ) && src.match( /^(http.+\/)[^\/]+$/ ).length > 0 )
 		         		return src.match( /^(http.+\/)[^\/]+$/ )[1];		         					         	
 		         	//fix. for iframes
          			return src.substring(0,src.lastIndexOf("/")+1);
-		        })()	
-}; 
+		        })();
+
+    //get the navigator language, default is english
+	this.user_language = (function() {
+						var lang = navigator.language || navigator.userLanguage;
+						if ( lang )
+							return lang.substring(0,2);
+						return 'en';
+					})();
+
+	this.language_translations = (function() {
+						var default_translations = {
+							no_support_msg: 'Your web browser does not support the video tag or missing the codec for this video file.<br><a href="//www.google.com/chrome/browser/" target="_blank">Click here to download Google Chrome.</a><br><br>Your web browser does not have Adobe Flash Player plugin.<br><a href="//get.adobe.com/flashplayer/" target="_blank">Click here to download Adobe Flash Player.</a>.'
+						};
+						if ( this.user_language != 'en' ) {
+							//load translations file if needed
+							var json_data = null;
+							jQuery.ajax({
+								url: this.script_uri+"languages/"+this.user_language+".json.js",
+								async: false,
+								dataType: 'json',
+								success: function ( data ) {
+									json_data = data[0];
+								}
+							});
+							//if translation file was not loaded ignore data
+							if ( json_data != null )
+								return json_data;
+						}
+						return default_translations;						
+					})();
+	
+	//no video tag or flash message 					
+	this.no_support_msg = this.language_translations.no_support_msg;
+
+	return this; 
+})();
 
 o3video = function( opts, container ) {
 
@@ -117,13 +152,19 @@ o3video = function( opts, container ) {
 
 		//get source
 		if ( self.origin.src != '' ) {
+
 			//only store the source if src and type is valid  
-			if ( self.origin.src != '' && self.ext2mime(self.origin.src) != '' )
-				self.source.push( { src: self.origin.src, type: self.ext2mime(self.origin.src), has_codec: self.is_codec_video(self.ext2mime(self.origin.src)) } );
-			
+			if ( self.ext2mime(self.origin.src) != '' ) {
+				var has_codec = self.is_codec_video(self.ext2mime(self.origin.src));
+				self.source.push( { src: self.origin.src, type: self.ext2mime(self.origin.src), has_codec: has_codec, media: '' } );
+				//update codec was found for source  
+				if ( has_codec )
+					self.codec_exists = true;
+			}
+
 			//set as flash src if is a mp4 file
 			if ( self.ext2mime(self.origin.src) == 'video/mp4' &&  self.flash_src == '' )
-				self.flash_src = self.origin.src;
+				self.flash_src = self.origin.src;			
 		}
 
 		//get sources
@@ -131,7 +172,8 @@ o3video = function( opts, container ) {
 			//get source's src + type, if no mime type defined try to get from the src 
 			var src = self.get_prop( $(this), 'src', '' ),
 				type = self.get_prop( $(this), 'type', self.ext2mime(src) ),
-				has_codec = self.is_codec_video(type);
+				has_codec = self.is_codec_video(type),
+				media = self.get_prop( $(this), 'media', '' );
 			
 			//update codec was found for source  
 			if ( has_codec )
@@ -139,7 +181,8 @@ o3video = function( opts, container ) {
 
 			//only store the source if src and type is valid  
 			if ( src != '' && type != '' )
-				self.source.push( { src: src, type: type, has_codec: has_codec } );
+				self.source.push( { src: src, type: type, has_codec: has_codec, media: media } );
+
 			//remove source from DOM
 			$(this).remove();
 
@@ -147,6 +190,7 @@ o3video = function( opts, container ) {
 			if ( type == 'video/mp4' &&  self.flash_src == '' )
 				self.flash_src = src;
 		});
+
 
 		//get message for browsers that do not support the <video> element
 		var no_support_msg = self.get_prop( self.$container, "innerHTML", '' );
@@ -196,6 +240,7 @@ o3video = function( opts, container ) {
 		    + '.playbtn:hover { opacity: 0.6 }'
 		    + '.playbtn_hide { visibility: hidden; opacity: 0; -ms-transform: scale(2,2); -webkit-transform: scale(2,2); transform: scale(2,2); }'
 		    + '.no_support_msg { display: none; font-size: 14px; color: #000000; font-family: sans-serif; background: #FFFFFF; text-align: center; padding: 20px 0px 0px 0px; }'
+		    + '.no_support_msg A { color: #000000; text-decoration: underline; }'
 		    + '</style>'
 		    + '</head><body><div id="main" class="fill_wnd"><a href="javascript:{}" class="playbtn transition"></a><div class="no_support_msg transition fill_wnd">'+no_support_msg+'</div></div></body></html>';
 
@@ -219,7 +264,7 @@ o3video = function( opts, container ) {
 
 		//create overlay play btn
 		self.create_playbtn();
-
+		
 		//create HTML5 video tag only if supported or codec available
 		if ( self.codec_exists ) {	
 
@@ -354,8 +399,20 @@ o3video.prototype.create_flash = function() {
 
 /** create and add HTML5 video tag to the iframe */
 o3video.prototype.create_video = function() {
-	var self = this;
+	var self = this,
+		sources = '';
 	this.type = 'html5';
+
+	for (var i = 0; i < self.source.length ; i++ ) {
+		var source = self.source[i]; 
+		
+		//fix for chrome
+		//chrome player becomeing broken if the source is allready was loaded in a video tag before or in another iframe/tab
+		//only in chrome we add random to same sources
+		if ( /Chrome/i.test(navigator.userAgent) && source.src != '' )
+			source.src += (source.src.split('?')[1] ? '&' : '?' )+Math.random();
+		sources += '<source src="'+source.src+'" type="'+source.type+'" media="'+source.media+'"></source>';
+	};
 
 	//create iframe video object and copy original video properties
 	this.$iframe_vid = $('<video id="video" width="100%" height="100%"'
@@ -365,18 +422,19 @@ o3video.prototype.create_video = function() {
 						+ ( this.origin.muted ? ' muted ' : '' )
 						+ ( this.origin.poster ? ' poster="'+this.origin.poster+'" ' : '' )
 						+ ( this.origin.preload ? ' preload="'+this.origin.preload+'" ' : '' )
-						//+ ( src ? ' src="'+src+'" ' : '' )
-		 				+ ' >'+this.origin.innerHTML+'</video>').appendTo(this.$iframe_main);		
+						+ ' >'+sources/*this.origin.innerHTML*/+'</video>').appendTo(this.$iframe_main);		
 	 
 	//fix for chrome
 	//chrome player becomeing broken if the source is allready was loaded in a video tag before or in another iframe/tab
 	//only in chrome we add random to same sources
+	/*
 	if ( /Chrome/i.test(navigator.userAgent) ) 
 		this.$iframe_vid.find('source').each(function(){
 			var src = jQuery(this).attr('src');
 			if ( src )
 				jQuery(this).attr('src',src += (src.split('?')[1] ? '&' : '?' )+Math.random());
 		});
+	*/
 
 	//bugfix for chrome, force to reload the file
 	if ( typeof this.$iframe_vid.get(0).load == 'function' )
@@ -464,7 +522,7 @@ o3video.prototype.ext2mime = function( filename ) {
 o3video.prototype.get_prop = function( $, prop_name, value ) {
 	return $.prop(prop_name) ? $.prop(prop_name) : value;
 };	
-
+ 
 //create console if not exist
 console = typeof console != 'undefined' ? console : { log: function(){} };
 
