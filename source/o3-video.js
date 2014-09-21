@@ -9,7 +9,7 @@
 * @license https://github.com/zoli-fischer/o3-video/blob/master/LICENSE
 */
 
-/** o3video defines static variable */
+/** o3video static variable */
 var o3video_defines = (function() {
 	this.script_uri = (function() {
 		         	var scripts = document.getElementsByTagName("script"),
@@ -33,34 +33,6 @@ var o3video_defines = (function() {
 		no_support_msg: 'Your web browser does not support the video tag or missing the codec for this video file.<br><a href="//www.google.com/chrome/browser/" target="_blank">Click here to download Google Chrome.</a><br><br>Your web browser does not have Adobe Flash Player plugin.<br><a href="//get.adobe.com/flashplayer/" target="_blank">Click here to download Adobe Flash Player.</a>.'
 	};
 	
-	/*
-	this.language_translations = (function() {
-						var default_translations = {
-							no_support_msg: 'Your web browser does not support the video tag or missing the codec for this video file.<br><a href="//www.google.com/chrome/browser/" target="_blank">Click here to download Google Chrome.</a><br><br>Your web browser does not have Adobe Flash Player plugin.<br><a href="//get.adobe.com/flashplayer/" target="_blank">Click here to download Adobe Flash Player.</a>.'
-						};
-						if ( this.user_language != 'en' ) {
-							//load translations file if needed
-							var json_data = null;
-							if ( jQuery )
-								jQuery.ajax({
-									url: this.script_uri+"languages/"+this.user_language+".json.js",
-									async: false,
-									dataType: 'json',
-									success: function ( data ) {
-										json_data = data[0];
-									}
-								});
-							//if translation file was not loaded ignore data
-							if ( json_data != null )
-								return json_data;
-						}
-						return default_translations;						
-					})();
-	
-	//no video tag or flash message 					
-	this.no_support_msg = this.language_translations.no_support_msg;
-	*/
-
 	return this; 
 })();
 
@@ -186,7 +158,7 @@ o3video = function( opts, container ) {
 				type = self.get_prop( $(this), 'type', self.ext2mime(src) ),
 				has_codec = self.is_codec_video(type),
 				media = self.get_prop( $(this), 'media', '' );
-			
+
 			//update codec was found for source  
 			if ( has_codec )
 				self.codec_exists = true;
@@ -414,10 +386,10 @@ o3video.prototype.create_flash = function() {
 	this.flash_name = 'o3f'+Math.random().toString().replace('.','');
 	
 
-	var embed = '<embed name="'+this.flash_name+'_embed" id="'+this.flash_name+'_embed"  src="'+o3video_defines.script_uri+'../o3-video.flash.swf?'+Math.random()+'" type="application/x-shockwave-flash" allowscriptaccess="always"\
+	var embed = '<embed name="'+this.flash_name+'_embed" id="'+this.flash_name+'_embed"  src="'+o3video_defines.script_uri+'o3-video.flash.swf" type="application/x-shockwave-flash" allowscriptaccess="always"\
 				wmode="transparent" menu="true" quality="high" allowfullscreen="true" width="100%" height="100%" flashvars="'+flashvars+'"></embed>',
 		object = '<object name="'+this.flash_name+'_obj" id="'+this.flash_name+'_obj" height="100%" width="100%" '+( /MSIE/i.test(navigator.userAgent) ? ' classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" ' : '' )+'>\
-				 <param name="movie" value="'+o3video_defines.script_uri+'../o3-video.flash.swf?'+Math.random()+'"></param>\
+				 <param name="movie" value="'+o3video_defines.script_uri+'o3-video.flash.swf"></param>\
 				 <param name="flashvars" value="'+flashvars+'"></param>\
 				 <param name="allowFullScreen" value="true"></param>\
 				 <param name="allowscriptaccess" value="always"></param>\
@@ -451,7 +423,7 @@ o3video.prototype.create_video = function() {
 	};
 
 	//create iframe video object and copy original video properties
-	this.$iframe_vid = $('<video id="video" width="100%" height="100%"'
+	this.$iframe_vid = jQuery('<video id="video" width="100%" height="100%"'
 						+ ( this.origin.autoplay ? ' autoplay ' : '' )
 						+ ( this.origin.controls ? ' controls ' : '' )
 						+ ( this.origin.loop ? ' loop ' : '' )
