@@ -5,10 +5,17 @@
 
 ## Features
 
-* Lightweight, less than 40kb
+* Plays mp4 ( with h264 codec ) on all devices
 * Works on desktops and mobile devices
-* Plays mp4, with h264 codec, on all devices
 * Supported web browsers: iOS (v3.0+), Android (v3.0+), Windows Mobile (v10+), Internet Explorer (v5.5+), Mozilla Firefox, Chrome, Safari, Opera 
+* Lightweight, less than 40kb
+* Multi language interface with auto-detect of web browser's language (Supported languages: English, Danish, Hungarian)
+
+## Demo
+
+[Click here for live demo](http://d1gsaguqqln0jq.cloudfront.net/demo.html)
+
+![Scan for live demo on your phone or table](http://d1gsaguqqln0jq.cloudfront.net/qr.png)
 
 ## Usage
 
@@ -21,22 +28,25 @@
 	<script type="text/javascript">
 	    (function($) {
 	        $(document).ready(function () {                             
-	            $('video').o3video();        
+	            $('#video1').o3video();        
 	        });
 	    })(jQuery);
 	</script>
 </head>
 <body>
-	<video width="540" height="380" controls poster="poster1.jpg">
+	<video width="540" height="380" controls poster="poster1.jpg" id="video1">
 		<source src="video1.mp4" type="video/mp4"> 
 	</video>
 </body>
 </html>
 ```
-
 ## Requirements
 
 [jQuery 1.6.0 or higher](http://jquery.com/download)
+
+## Download
+
+[Click here for download](/zoli-fischer/o3-video/raw/master/o3-video.1.1.0.zip)
 
 ## License
 

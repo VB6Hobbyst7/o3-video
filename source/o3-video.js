@@ -35,14 +35,15 @@ var o3video_config = (function() {
 						if ( this.user_language != 'en' ) {
 							//load translations file if needed
 							var json_data = null;
-							jQuery.ajax({
-								url: this.script_uri+"languages/"+this.user_language+".json.js",
-								async: false,
-								dataType: 'json',
-								success: function ( data ) {
-									json_data = data[0];
-								}
-							});
+							if ( jQuery )
+								jQuery.ajax({
+									url: this.script_uri+"languages/"+this.user_language+".json.js",
+									async: false,
+									dataType: 'json',
+									success: function ( data ) {
+										json_data = data[0];
+									}
+								});
 							//if translation file was not loaded ignore data
 							if ( json_data != null )
 								return json_data;
