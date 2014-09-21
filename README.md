@@ -12,11 +12,11 @@
 
 ## Demo
 
-[Click here for live demo](http://d1gsaguqqln0jq.cloudfront.net/demo.html)
+[Click here for live demo](//o3-video.s3.amazonaws.com/demo.html)
 
 Scan this QR code for live demo on your phone or table:
 
-![](http://d1gsaguqqln0jq.cloudfront.net/qr.png)
+![](//o3-video.s3.amazonaws.com/qr.png)
 
 ## Sample Code
 
