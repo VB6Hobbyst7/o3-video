@@ -9,8 +9,8 @@
 * @license https://github.com/zoli-fischer/o3-video/blob/master/LICENSE
 */
 
-/** o3video global config*/
-var o3video_config = (function() {
+/** o3video defines static variable */
+var o3video_defines = (function() {
 	this.script_uri = (function() {
 		         	var scripts = document.getElementsByTagName("script"),
 		         		src = scripts[scripts.length - 1].src;		         	
@@ -21,13 +21,19 @@ var o3video_config = (function() {
 		        })();
 
     //get the navigator language, default is english
-	this.user_language = (function() {
+	this.navigator_language = (function() {
 						var lang = navigator.language || navigator.userLanguage;
 						if ( lang )
 							return lang.substring(0,2);
 						return 'en';
 					})();
 
+	//default (English) interface language translations  
+	this.default_translations = {
+		no_support_msg: 'Your web browser does not support the video tag or missing the codec for this video file.<br><a href="//www.google.com/chrome/browser/" target="_blank">Click here to download Google Chrome.</a><br><br>Your web browser does not have Adobe Flash Player plugin.<br><a href="//get.adobe.com/flashplayer/" target="_blank">Click here to download Adobe Flash Player.</a>.'
+	};
+	
+	/*
 	this.language_translations = (function() {
 						var default_translations = {
 							no_support_msg: 'Your web browser does not support the video tag or missing the codec for this video file.<br><a href="//www.google.com/chrome/browser/" target="_blank">Click here to download Google Chrome.</a><br><br>Your web browser does not have Adobe Flash Player plugin.<br><a href="//get.adobe.com/flashplayer/" target="_blank">Click here to download Adobe Flash Player.</a>.'
@@ -53,6 +59,7 @@ var o3video_config = (function() {
 	
 	//no video tag or flash message 					
 	this.no_support_msg = this.language_translations.no_support_msg;
+	*/
 
 	return this; 
 })();
@@ -66,8 +73,12 @@ o3video = function( opts, container ) {
 	
 	//options
 	self.opts = $.extend( {
-		playButtonImage: 'data:image/png;base64,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'
+		playButtonImage: 'data:image/png;base64,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',
+		language: o3video_defines.navigator_language
 	}, opts );
+
+	//load interface language
+	self.translations = self.load_translations( self.opts.language );	
 
 	//container
 	self.$container = $(container); 
@@ -136,8 +147,8 @@ o3video = function( opts, container ) {
 					innerHTML: self.get_prop( self.$container, "innerHTML", '' ) };
 
 	/** Constructor */
-	self.constructor__ = function() {	
-		
+	self.constructor__ = function() {
+
 		//create iframe
 		self.$iframe = $('<iframe frameborder="0" allowTransparency="true"></iframe>').insertAfter(self.$container).attr({
 			id: self.$container.attr("id"),
@@ -192,10 +203,9 @@ o3video = function( opts, container ) {
 				self.flash_src = src;
 		});
 
-
 		//get message for browsers that do not support the <video> element
 		var no_support_msg = self.get_prop( self.$container, "innerHTML", '' );
-		no_support_msg = $.trim(no_support_msg).length == 0 ? o3video_config.no_support_msg : no_support_msg;
+		no_support_msg = $.trim(no_support_msg).length == 0 ? self.translations.no_support_msg : no_support_msg;
 
 		//stop loading the original video and remove it from DOM
 		self.$container.src = false;		
@@ -355,9 +365,30 @@ o3video.prototype.create_playbtn = function() {
 	});
 };
 
+/**
+* Load language translations
+* @param string(2) language Language to load 
+*/
+o3video.prototype.load_translations = function( language ) {
+	if ( language != 'en' ) {
+		//load translations file if needed
+		var json_data = null;
+		jQuery.ajax({
+			url: o3video_defines.script_uri+"languages/"+language+".json.js",
+			async: false,
+			dataType: 'json',
+			success: function ( data ) {
+				json_data = data[0];
+			}
+		});
+		//if translation file was not loaded ignore data
+		if ( json_data != null )
+			return json_data;
+	}
+	return default_translations;
+};
 
 /**
-*
 * @param string name Name of the object 
 */
 o3video.prototype.get_flash_ref = function() {
@@ -366,7 +397,9 @@ o3video.prototype.get_flash_ref = function() {
 	return embed ? embed : obj;
 };
 
-/** create and add flash object to the iframe */
+/** 
+* Create and add flash object to the iframe 
+*/
 o3video.prototype.create_flash = function() {
 	this.type = 'flash';
 	var flashvars = 'src='+this.flash_src
@@ -381,10 +414,10 @@ o3video.prototype.create_flash = function() {
 	this.flash_name = 'o3f'+Math.random().toString().replace('.','');
 	
 
-	var embed = '<embed name="'+this.flash_name+'_embed" id="'+this.flash_name+'_embed"  src="'+o3video_config.script_uri+'../o3-video.flash.swf?'+Math.random()+'" type="application/x-shockwave-flash" allowscriptaccess="always"\
+	var embed = '<embed name="'+this.flash_name+'_embed" id="'+this.flash_name+'_embed"  src="'+o3video_defines.script_uri+'../o3-video.flash.swf?'+Math.random()+'" type="application/x-shockwave-flash" allowscriptaccess="always"\
 				wmode="transparent" menu="true" quality="high" allowfullscreen="true" width="100%" height="100%" flashvars="'+flashvars+'"></embed>',
 		object = '<object name="'+this.flash_name+'_obj" id="'+this.flash_name+'_obj" height="100%" width="100%" '+( /MSIE/i.test(navigator.userAgent) ? ' classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" ' : '' )+'>\
-				 <param name="movie" value="'+o3video_config.script_uri+'../o3-video.flash.swf?'+Math.random()+'"></param>\
+				 <param name="movie" value="'+o3video_defines.script_uri+'../o3-video.flash.swf?'+Math.random()+'"></param>\
 				 <param name="flashvars" value="'+flashvars+'"></param>\
 				 <param name="allowFullScreen" value="true"></param>\
 				 <param name="allowscriptaccess" value="always"></param>\
@@ -398,7 +431,9 @@ o3video.prototype.create_flash = function() {
 	jQuery( object ).appendTo(this.$iframe_main);
 };
 
-/** create and add HTML5 video tag to the iframe */
+/** 
+* Create and add HTML5 video tag to the iframe 
+*/
 o3video.prototype.create_video = function() {
 	var self = this,
 		sources = '';
@@ -423,19 +458,7 @@ o3video.prototype.create_video = function() {
 						+ ( this.origin.muted ? ' muted ' : '' )
 						+ ( this.origin.poster ? ' poster="'+this.origin.poster+'" ' : '' )
 						+ ( this.origin.preload ? ' preload="'+this.origin.preload+'" ' : '' )
-						+ ' >'+sources/*this.origin.innerHTML*/+'</video>').appendTo(this.$iframe_main);		
-	 
-	//fix for chrome
-	//chrome player becomeing broken if the source is allready was loaded in a video tag before or in another iframe/tab
-	//only in chrome we add random to same sources
-	/*
-	if ( /Chrome/i.test(navigator.userAgent) ) 
-		this.$iframe_vid.find('source').each(function(){
-			var src = jQuery(this).attr('src');
-			if ( src )
-				jQuery(this).attr('src',src += (src.split('?')[1] ? '&' : '?' )+Math.random());
-		});
-	*/
+						+ ' >'+sources/*this.origin.innerHTML*/+'</video>').appendTo(this.$iframe_main);			
 
 	//bugfix for chrome, force to reload the file
 	if ( typeof this.$iframe_vid.get(0).load == 'function' )

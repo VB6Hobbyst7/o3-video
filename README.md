@@ -15,14 +15,15 @@
 
 [Click here for live demo](http://d1gsaguqqln0jq.cloudfront.net/demo.html)
 
-![Scan for live demo on your phone or table](http://d1gsaguqqln0jq.cloudfront.net/qr.png)
+Scan this QR code for live demo on your phone or table:
+![](http://d1gsaguqqln0jq.cloudfront.net/qr.png)
 
-## Usage
+## Sample Code
 
 ```html
 <!DOCTYPE html>
 <head>
-	<title>o3-video usage</title>	
+	<title>o3-video Sample Code</title>	
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 	<script src="//raw.githubusercontent.com/zoli-fischer/o3-video/master/o3-video.min.js"></script>
 	<script type="text/javascript">
@@ -40,13 +41,18 @@
 </body>
 </html>
 ```
+
+#Compatibility
+
+Confirmed as working with iOS (v4.0+), Android (v3.0+), Windows Mobile (v10+), Internet Explorer (v5.5+), Mozilla Firefox, Chrome, Safari, Opera. Web browsers without HTML 5 video tag support or mp4 (h264 codec) codec needs Adobe Flash Player v9.0+. 
+
 ## Requirements
 
 [jQuery 1.6.0 or higher](http://jquery.com/download)
 
 ## Download
 
-[Click here for download](/zoli-fischer/o3-video/raw/master/o3-video.1.1.0.zip)
+[Click here for download](https://github.com/zoli-fischer/o3-video/raw/master/o3-video.1.1.0.zip)
 
 ## License
 
