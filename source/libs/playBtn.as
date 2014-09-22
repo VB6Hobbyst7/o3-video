@@ -28,6 +28,8 @@ package libs {
 		private var loadtype_:String = ''; //type of file loading, base64 or url
 		
 		public var contentloader = new Loader();
+		private var loader_width:Number = 0; //content loader original width
+		private var loader_height:Number = 0; //content loader original height
 		
 		//Flag, true if play button need to be showed
 		private var show_ = true;
@@ -135,6 +137,9 @@ package libs {
 		
 		//Image loading done
 		private function loadingDone( event:Event ) {
+			//Store original loader width and height
+			this.loader_width = this.contentloader.width;
+			this.loader_height = this.contentloader.height;
 			//Recalculate button dimension and position
 			this.resize( this.width_, this.height_ );			
 			//Show button if needed

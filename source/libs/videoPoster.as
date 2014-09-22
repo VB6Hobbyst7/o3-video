@@ -24,6 +24,8 @@ package libs {
 		private var type_:String = ''; //image file ext
 		
 		public var contentloader = new Loader();
+		private var loader_width:Number = 0; //content loader original width
+		private var loader_height:Number = 0; //content loader original height
 		
 		//Flag if need to be showed
 		private var show_ = true;
@@ -38,7 +40,8 @@ package libs {
 			this.height_ = height_;
 			
 			//Add content loader
-			//this.addChild(this.contentloader);
+			this.addChild(this.contentloader);
+			this.contentloader.visible = false;
 			
 			//Set hidden
 			this.visible = false;
@@ -81,8 +84,13 @@ package libs {
 		
 		//Loading done
 		private function loadingDone( event:Event ) {
+			//Store original loader width and height
+			this.loader_width = this.contentloader.width;
+			this.loader_height = this.contentloader.height;
+			//Recalculate dimension and position
 			this.resize( this.width_, this.height_ );			
-			this.visible = this.show_;
+			//Show button if needed
+			this.visible = this.show_;			
 		}
 		
 		//Loading error
@@ -97,23 +105,48 @@ package libs {
 			
 			if ( this.contentloader.width && this.contentloader.height ) {
 				
-				var matrix:Matrix = new Matrix();
-				matrix.scale(1, 1);
+				//try to generate the bitmap
+				try {
+					
+					var matrix:Matrix = new Matrix();
+					matrix.scale(1, 1);
+					
+					var bitmapDataTemp = new BitmapData( this.contentloader.width, this.contentloader.height, true, 0xFFFFFF );
+					bitmapDataTemp.draw( this.contentloader, matrix, null, null, null, true );
+									
+					if ( this.contains( this.bgImage ))
+						this.removeChild(this.bgImage);	
+					
+					this.bgImage = new Bitmap( this.resizeImage( bitmapDataTemp, this.width_, this.height_, true ), "auto", true );
+					this.bgImage.x = ( this.width_ - this.bgImage.width ) / 2;
+					this.bgImage.y = ( this.height_ - this.bgImage.height ) / 2;
+					
+					if (this.contains(this.bgImage))
+						this.removeChild(this.bgImage);
+					this.addChild(this.bgImage);
+					
+					this.contentloader.visible = false;
+					this.contentloader.scaleX = 1;
+					this.contentloader.scaleY = 1;
+					
+				} catch(e:Error) {
 				
-				var bitmapDataTemp = new BitmapData( this.contentloader.width, this.contentloader.height, true, 0xFFFFFF );
-				bitmapDataTemp.draw( this.contentloader, matrix, null, null, null, true );
-								
-				if ( this.contains( this.bgImage ))
-					this.removeChild(this.bgImage);	
-				
-				this.bgImage = new Bitmap( this.resizeImage( bitmapDataTemp, this.width_, this.height_, true ), "auto", true );
-				this.bgImage.x = ( this.width_ - this.bgImage.width ) / 2;
-				this.bgImage.y = ( this.height_ - this.bgImage.height ) / 2;
-				
-				if (this.contains(this.bgImage))
-					this.removeChild(this.bgImage);
-				this.addChild(this.bgImage)
-				
+					//if bitmap generation not possible, use content loader 
+					this.contentloader.visible = true;
+					
+					if ( this.loader_width > 0 && this.loader_height > 0 ) {
+						var scaleX:Number = this.width_ / this.loader_width,
+							scaleY:Number = this.height_ / this.loader_height;
+						if (scaleX > scaleY) scaleX = scaleY;
+							else scaleY = scaleX;				
+						
+						this.contentloader.scaleX = scaleX;
+						this.contentloader.scaleY = scaleY;
+						this.contentloader.x = ( this.width_ - this.contentloader.width ) / 2;
+						this.contentloader.y = ( this.height_ - this.contentloader.height ) / 2;
+					}
+					
+				}
 			}
 		}
 				
