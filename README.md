@@ -52,7 +52,7 @@ Confirmed as working with iOS (v4.0+), Android (v3.0+), Windows Mobile (v10+), I
 
 ## Download
 
-[Click here for download](https://github.com/zoli-fischer/o3-video/raw/master/o3-video.1.1.0.zip)
+[Click here for download](https://github.com/zoli-fischer/o3-video/raw/master/o3-video.1.1.1.zip)
 
 #Upcoming features
 
