@@ -30,7 +30,18 @@ var o3video_defines = (function() {
 
 	//default (English) interface language translations  
 	this.default_translations = {
-		no_support_msg: 'Your web browser does not support the video tag or missing the codec for this video file.<br><a href="//www.google.com/chrome/browser/" target="_blank">Click here to download Google Chrome.</a><br><br>Your web browser does not have Adobe Flash Player plugin.<br><a href="//get.adobe.com/flashplayer/" target="_blank">Click here to download Adobe Flash Player.</a>.'
+		no_support_msg: 'Your web browser does not support the video tag or missing the codec for this video file.<br><a href="//www.google.com/chrome/browser/" target="_blank">Click here to download Google Chrome.</a><br><br>Your web browser does not have Adobe Flash Player plugin.<br><a href="//get.adobe.com/flashplayer/" target="_blank">Click here to download Adobe Flash Player.</a>.',
+		play_video: "Play video",
+		pause_video: "Pause video",
+		mute: "Mute",
+		unmute: "Unmute",
+		loop_video: "Loop video",
+		dont_loop_video: "Don't loop video",
+		show_controls: "Show controls",
+		hide_controls: "Hide controls",
+		save_video_as: "Save video as...",
+		copy_video_url: "Copy video URL",
+		open_video_in_new_tab: "Open video in new tab"
 	};
 	
 	return this; 
@@ -47,7 +58,7 @@ o3video = function( opts, container ) {
 	self.opts = $.extend( {
 		playButtonImage: 'data:image/png;base64,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',
 		language: o3video_defines.navigator_language
-	}, opts );
+	}, opts );	
 
 	//load interface language
 	self.translations = self.load_translations( self.opts.language );	
@@ -115,12 +126,13 @@ o3video = function( opts, container ) {
 					poster: self.get_prop( self.$container, "poster", '' ),
 					preload: self.get_prop( self.$container, "preload", false ),
 					src: self.get_prop( self.$container, "src", '' ),
-					width: self.get_prop( self.$container, "width", 'auto' ),
+					width: self.get_attr( self.$container, "width", 'auto' ),
+					height: self.get_attr( self.$container, "height", 'auto' ),
 					innerHTML: self.get_prop( self.$container, "innerHTML", '' ) };
 
 	/** Constructor */
 	self.constructor__ = function() {
-
+ 
 		//create iframe
 		self.$iframe = $('<iframe frameborder="0" allowTransparency="true"></iframe>').insertAfter(self.$container).attr({
 			id: self.$container.attr("id"),
@@ -168,6 +180,7 @@ o3video = function( opts, container ) {
 				self.source.push( { src: src, type: type, has_codec: has_codec, media: media } );
 
 			//remove source from DOM
+			$(this).attr( 'src', '' ); 
 			$(this).remove();
 
 			//set as flash src if is a mp4 file
@@ -178,9 +191,6 @@ o3video = function( opts, container ) {
 		//get message for browsers that do not support the <video> element
 		var no_support_msg = self.get_prop( self.$container, "innerHTML", '' );
 		no_support_msg = $.trim(no_support_msg).length == 0 ? self.translations.no_support_msg : no_support_msg;
-
-		//stop loading the original video and remove it from DOM
-		self.$container.src = false;		
 
 		//msie 8 and below do not support video tag, so we need to remove the video sibling by sibling from DOM
 		if ( /MSIE/i.test(navigator.userAgent) && parseFloat((navigator.userAgent.toLowerCase().match(/.*(?:rv|ie)[\/: ](.+?)([ \);]|$)/) || [])[1]) < 9 ) {			
@@ -208,8 +218,16 @@ o3video = function( opts, container ) {
 				$(rem_list[i]).remove();
 		}
 
-		//remove video tag from DOM
-		self.$container.remove();
+
+		setTimeout( function() {
+				self.container.pause();
+
+				//stop loading the original video and remove it from DOM
+				self.container.src = '';
+
+				//remove video tag from DOM
+				self.$container.remove();
+			}, 200 );		
 
 		//create iframe content
 		var myContent = '<!DOCTYPE html>'
@@ -374,27 +392,40 @@ o3video.prototype.get_flash_ref = function() {
 */
 o3video.prototype.create_flash = function() {
 	this.type = 'flash';
-	var flashvars = 'src='+this.flash_src
-				   +'&autoplay='+( this.origin.autoplay ? 'true' : 'false' )
-				   +'&loop='+( this.origin.loop ? 'true' : 'false' )
-				   +'&muted='+( this.origin.muted ? 'true' : 'false' )
-				   +'&controls='+( this.origin.controls ? 'true' : 'false' )				   
-				   +'&poster='+( this.origin.poster.replace(/\+/g,'%2B') )
-				   +'&playButtonImage='+this.opts.playButtonImage.replace(/\+/g,'%2B');	
+	var t_ = this.translations,
+		flashvars = 'src='+this.flash_src
+					+'&autoplay='+( this.origin.autoplay ? 'true' : 'false' )
+					+'&loop='+( this.origin.loop ? 'true' : 'false' )
+					+'&muted='+( this.origin.muted ? 'true' : 'false' )
+					+'&controls='+( this.origin.controls ? 'true' : 'false' )				   
+					+'&poster='+( this.origin.poster.replace(/\+/g,'%2B') )
+					+'&playButtonImage='+this.opts.playButtonImage.replace(/\+/g,'%2B')
+					+( t_.play_video ? '&l_plyv='+escape(t_.play_video) : '' )
+					+( t_.pause_video ? '&l_pasv='+escape(t_.pause_video) : '' )
+					+( t_.mute ? '&l_mute='+escape(t_.mute) : '' )
+					+( t_.unmute ? '&l_umute='+escape(t_.unmute) : '' )
+					+( t_.loop_video ? '&l_lopv='+escape(t_.loop_video) : '' )
+					+( t_.dont_loop_video ? '&l_nlpv='+escape(t_.dont_loop_video) : '' )
+					+( t_.show_controls ? '&l_sctr='+escape(t_.show_controls) : '' )
+					+( t_.hide_controls ? '&l_hctr='+escape(t_.hide_controls) : '' )
+					+( t_.save_video_as ? '&l_savv='+escape(t_.save_video_as) : '' )
+					+( t_.copy_video_url ? '&l_cpyu='+escape(t_.copy_video_url) : '' )
+					+( t_.open_video_in_new_tab ? '&l_opnn='+escape(t_.open_video_in_new_tab) : '' );
+	
 
 	//create flash object name
 	this.flash_name = 'o3f'+Math.random().toString().replace('.','');
 	
 
-	var embed = '<embed name="'+this.flash_name+'_embed" id="'+this.flash_name+'_embed"  src="'+o3video_defines.script_uri+'o3-video.flash.swf" type="application/x-shockwave-flash" allowscriptaccess="always"\
+	var embed = '<embed name="'+this.flash_name+'_embed" id="'+this.flash_name+'_embed"  src="'+o3video_defines.script_uri+'o3-video.flash.swf?'+Math.random()+'" type="application/x-shockwave-flash" allowscriptaccess="always"\
 				wmode="transparent" menu="true" quality="high" allowfullscreen="true" width="100%" height="100%" flashvars="'+flashvars+'"></embed>',
 		object = '<object name="'+this.flash_name+'_obj" id="'+this.flash_name+'_obj" height="100%" width="100%" '+( /MSIE/i.test(navigator.userAgent) ? ' classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" ' : '' )+'>\
-				 <param name="movie" value="'+o3video_defines.script_uri+'o3-video.flash.swf"></param>\
+				 <param name="movie" value="'+o3video_defines.script_uri+'o3-video.flash.swf?'+Math.random()+'"></param>\
 				 <param name="flashvars" value="'+flashvars+'"></param>\
 				 <param name="allowFullScreen" value="true"></param>\
 				 <param name="allowscriptaccess" value="always"></param>\
 				 <param name="quality" value="hight"></param>\
-				 <param name="wmode" value="transparent"></param>\
+				 <param name="wmode" value="direct"></param>\
 				 <param name="menu" value="true"></param>'
 				 + embed
 				 +'</object>';
@@ -517,6 +548,17 @@ o3video.prototype.ext2mime = function( filename ) {
 */
 o3video.prototype.get_prop = function( $, prop_name, value ) {
 	return $.prop(prop_name) ? $.prop(prop_name) : value;
+};	
+
+/** 
+* Check jQuery object for attribute, if not exists return value
+* @param object $ jQuery object
+* @param string attr_name Name of the attribute to search for
+* @param mixed value If attribute not found return this value
+* @return mixed
+*/
+o3video.prototype.get_attr = function( $, attr_name, value ) {
+	return $.attr(attr_name) ? $.attr(attr_name) : value;
 };	
  
 //create console if not exist

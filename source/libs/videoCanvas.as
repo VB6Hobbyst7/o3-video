@@ -25,7 +25,7 @@ package libs
 
 		//Double-buffering values for fast playback
 		public var loBufferTime:Number = 3;
-		public var hiBufferTime:Number = 15;
+		public var hiBufferTime:Number = 8;
 
 		public var streamServer:String = null;
 
@@ -93,6 +93,7 @@ package libs
 		//Pause file
 		public function Pause()
 		{
+			dispatchEvent( new Event('paused') );
 			this.playing_ = false;
 			this.paused_ = true;
 			try{
@@ -103,6 +104,7 @@ package libs
 		//File end by playing
 		public function Ended()
 		{
+			dispatchEvent( new Event('paused') );
 			this.playing_ = false;
 			this.paused_ = true;
 			try{
@@ -128,6 +130,7 @@ package libs
 		public var initStarted = false;
 		public function Play()
 		{
+			dispatchEvent( new Event('playing') );	
 			this.playing_ = true;
 			this.paused_ = false;
 						
@@ -234,6 +237,9 @@ package libs
 				
 				var seek_ = Math.ceil(this.videoMetaDuration) * percent,
 					playing_ = this.isPlaying();
+				
+				dispatchEvent( new Event( this.playing_ ? 'playing' : 'paused' ) );
+				
 				seek_ = seek_ >= this.videoMetaDuration ? this.videoMetaDuration - this.videoMetaDuration * 0.005 : seek_; 
 				
 				this.stream_ns.pause();
@@ -342,7 +348,7 @@ package libs
 		private function netStatusHandler( event:NetStatusEvent ):void
 		{	
 			//Netstream event info before load
-			trace(event.info.code);
+			//trace(event.info.code);
 			switch (event.info.code) {
 				case "NetStream.Play.StreamNotFound" :		
 					dispatchEvent( new Event('streamNotFound') );
@@ -355,7 +361,7 @@ package libs
 				switch (event.info.code)
 				{
 					case "NetStream.Play.Start" :
-						dispatchEvent( new Event('start') );
+						dispatchEvent( new Event('playStart') );
 						break;					
 					case "NetStream.Seek.InvalidTime" :
 						try {
