@@ -1,11 +1,12 @@
 /**
 * O3 video player
+* @version 1.1.2
 *
 * Cross browser javascript video player
 * Released under the MIT license
 *
-* @author Zoltan Fischer 
-* @project https://github.com/zoli-fischer/o3-video 
+* @author Zoltan Fischer
+* @project https://github.com/zoli-fischer/o3-video  
 * @license https://github.com/zoli-fischer/o3-video/blob/master/LICENSE
 */
 
@@ -115,8 +116,10 @@ o3video = function( opts, container ) {
 	self.flash_src = '';
 
 	//store original video attributes
-	self.origin = { autoplay: self.get_prop( self.$container, "autoplay", false ),
+	self.origin = { /*autoplay: self.get_prop( self.$container, "autoplay", false ),*/
 					//check for muted, webkit dosn't supports the muted attribute, we need to check in the HTML code, @todo: regexp need to improved
+					autoplay: / autoplay/i.test(self.$container.get(0).outerHTML), 
+					volume: self.get_attr( self.$container, "volume", '100' ),
 					controls: / controls/i.test(self.$container.get(0).outerHTML), 
 					//controls: self.get_prop( self.$container, "controls", false ),
 					height: self.get_prop( self.$container, "height", 'auto' ),
@@ -128,7 +131,7 @@ o3video = function( opts, container ) {
 					src: self.get_prop( self.$container, "src", '' ),
 					width: self.get_attr( self.$container, "width", 'auto' ),
 					height: self.get_attr( self.$container, "height", 'auto' ),
-					innerHTML: self.get_prop( self.$container, "innerHTML", '' ) };
+					innerHTML: self.get_prop( self.$container, "innerHTML", '' ) };		
 
 	/** Constructor */
 	self.constructor__ = function() {
@@ -144,7 +147,7 @@ o3video = function( opts, container ) {
 			style: self.$container.attr("style"),
 			'class': self.$container.attr("class")		
 		}).css('overflow','hidden');
-		self.$iframe.get(0).o3video = self;			
+		self.$iframe.get(0).o3video = self;		
 
 		//get source
 		if ( self.origin.src != '' ) {
@@ -156,12 +159,12 @@ o3video = function( opts, container ) {
 				//update codec was found for source  
 				if ( has_codec )
 					self.codec_exists = true;
-			}
+			};
 
 			//set as flash src if is a mp4 file
 			if ( self.ext2mime(self.origin.src) == 'video/mp4' &&  self.flash_src == '' )
-				self.flash_src = self.origin.src;			
-		}
+				self.flash_src = self.origin.src;
+		};
 
 		//get sources
 		self.$container.find('source').each(function(){
@@ -184,31 +187,35 @@ o3video = function( opts, container ) {
 			$(this).remove();
 
 			//set as flash src if is a mp4 file
-			if ( type == 'video/mp4' &&  self.flash_src == '' )
-				self.flash_src = src;
-		});
+			if ( type == 'video/mp4' && self.flash_src == '' )
+				self.flash_src = src;				
+				
+		});		
 
 		//get message for browsers that do not support the <video> element
 		var no_support_msg = self.get_prop( self.$container, "innerHTML", '' );
 		no_support_msg = $.trim(no_support_msg).length == 0 ? self.translations.no_support_msg : no_support_msg;
 
-		//msie 8 and below do not support video tag, so we need to remove the video sibling by sibling from DOM
-		if ( /MSIE/i.test(navigator.userAgent) && parseFloat((navigator.userAgent.toLowerCase().match(/.*(?:rv|ie)[\/: ](.+?)([ \);]|$)/) || [])[1]) < 9 ) {			
+		//web browser without video tag support, so we need to remove the video sibling by sibling from DOM
+		if ( !this.supports_video() /*/MSIE/i.test(navigator.userAgent) && parseFloat((navigator.userAgent.toLowerCase().match(/.*(?:rv|ie)[\/: ](.+?)([ \);]|$)/) || [])[1]) <= 9 */) {			
 			var old_obj = self.$container.get(0),
 				rem_list = [];	
 			//get elements from inside the video
-			while ( old_obj.nextSibling && old_obj.nextSibling.tagName != '/VIDEO' )	{				
+			while ( old_obj.nextSibling && old_obj.nextSibling.tagName != '/VIDEO' )	{								
 				old_obj = old_obj.nextSibling;
 				//get flash source for ie8
 				if ( old_obj.tagName == 'SOURCE' ) {					
 					if ( self.ext2mime(old_obj.src) == 'video/mp4' && self.flash_src == '' )
-						self.flash_src = old_obj.src;
-					if ( !(/^(?:[a-z]+:)?\/\//i.test(self.flash_src)) ) //if the src is relative we need to convert to absolute
-						self.flash_src = window.location.protocol+'//'+window.location.hostname+window.location.pathname+self.flash_src											
-				}
+						self.flash_src = old_obj.src;					
+					if ( !(/^(?:[a-z]+:)?\/\//i.test(self.flash_src)) ) {						
+						//if the src is relative we need to convert to absolute
+						var url = window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1);
+						self.flash_src = window.location.protocol+'//'+window.location.hostname+( self.flash_src.charAt(0) == '/' ? '' : url )+self.flash_src;
+					};
+				};
 				if ( old_obj.tagName != 'IFRAME' )
 					rem_list.push( old_obj );
-			}
+			};
 			//get the video closeing element
 			old_obj = old_obj.nextSibling;
 			if ( old_obj.tagName == '/VIDEO' )
@@ -216,18 +223,20 @@ o3video = function( opts, container ) {
 			//remove from DOM
 			for ( var i = 0 ; i < rem_list.length; i++ )
 				$(rem_list[i]).remove();
-		}
+		};
 
 
 		setTimeout( function() {
-				self.container.pause();
+
+				if ( self.container.pause )
+					self.container.pause();
 
 				//stop loading the original video and remove it from DOM
 				self.container.src = '';
 
 				//remove video tag from DOM
 				self.$container.remove();
-			}, 200 );		
+			}, 200 );				
 
 		//create iframe content
 		var myContent = '<!DOCTYPE html>'
@@ -252,7 +261,7 @@ o3video = function( opts, container ) {
 		self.iframe_doc = self.iframe_wnd.document;
 		self.iframe_doc.open('text/html', 'replace');
 		self.iframe_doc.write(myContent);
-		self.iframe_doc.close();		
+		self.iframe_doc.close();
 
 		//store iframe main 
 		self.$iframe_main = $(self.iframe_doc).find('#main');
@@ -264,13 +273,13 @@ o3video = function( opts, container ) {
 		self.$no_support_msg = $(self.iframe_doc).find('.no_support_msg');	
 
 		//create overlay play btn
-		self.create_playbtn();
-		
+		self.create_playbtn();			
+
 		//create HTML5 video tag only if supported or codec available
 		if ( self.codec_exists ) {	
 
 			//create video tag
-			self.create_video();
+			self.create_video();			
 
 		} else {
 
@@ -278,12 +287,12 @@ o3video = function( opts, container ) {
 			this.$playbtn.css('display','none');
 
 			//check for flash player version
-			self.flash_exists = self.get_flash_version().split(',').shift();			
+			self.flash_exists = self.get_flash_version().split(',').shift();
 
 			//if flash player ver min. 9 exists and mp4 source exists show flash player
 			if ( self.flash_exists >= 9 && self.flash_src != '' ) {			
-
-				//create flash object			
+				
+				//create flash object
 				self.create_flash();
 
 			} else {
@@ -291,9 +300,9 @@ o3video = function( opts, container ) {
 				//show not support msg
 				self.$no_support_msg.css('display','block');
 				
-			}						
+			};						
 		
-		}
+		};
 
 	};
 
@@ -314,8 +323,8 @@ o3video.prototype.hideOverlayPlayBtn = function( hide ) {
 		setTimeout(function(){ btn.css('display','none'); },300);
 	} else {
 		this.$playbtn.css('display','block').removeClass('playbtn_hide');		
-	}
-}
+	};
+};
 
 /** start/seek the video player */
 o3video.prototype.play = function() {
@@ -323,7 +332,7 @@ o3video.prototype.play = function() {
 		this.$iframe_vid.get(0).play();
 	} else {
 		this.get_flash_ref().js_play();
-	}	
+	};	
 };
 
 /** start/seek the video player */
@@ -332,7 +341,7 @@ o3video.prototype.pause = function() {
 		this.$iframe_vid.get(0).pause();
 	} else {
 		this.get_flash_ref().js_pause();
-	}
+	};
 };
 
 /** create and add overlay play button to the iframe */
@@ -374,7 +383,7 @@ o3video.prototype.load_translations = function( language ) {
 		//if translation file was not loaded ignore data
 		if ( json_data != null )
 			return json_data;
-	}
+	};
 	return default_translations;
 };
 
@@ -397,6 +406,7 @@ o3video.prototype.create_flash = function() {
 					+'&autoplay='+( this.origin.autoplay ? 'true' : 'false' )
 					+'&loop='+( this.origin.loop ? 'true' : 'false' )
 					+'&muted='+( this.origin.muted ? 'true' : 'false' )
+					+'&soundVolume='+( this.origin.volume ? this.origin.volume / 100 : 1 )
 					+'&controls='+( this.origin.controls ? 'true' : 'false' )				   
 					+'&poster='+( this.origin.poster.replace(/\+/g,'%2B') )
 					+'&playButtonImage='+this.opts.playButtonImage.replace(/\+/g,'%2B')
@@ -414,8 +424,7 @@ o3video.prototype.create_flash = function() {
 	
 
 	//create flash object name
-	this.flash_name = 'o3f'+Math.random().toString().replace('.','');
-	
+	this.flash_name = 'o3f'+Math.random().toString().replace('.','');	
 
 	var embed = '<embed name="'+this.flash_name+'_embed" id="'+this.flash_name+'_embed"  src="'+o3video_defines.script_uri+'o3-video.flash.swf?'+Math.random()+'" type="application/x-shockwave-flash" allowscriptaccess="always"\
 				wmode="transparent" menu="true" quality="high" allowfullscreen="true" width="100%" height="100%" flashvars="'+flashvars+'"></embed>',
@@ -440,7 +449,7 @@ o3video.prototype.create_flash = function() {
 o3video.prototype.create_video = function() {
 	var self = this,
 		sources = '';
-	this.type = 'html5';
+	this.type = 'html5';	
 
 	for (var i = 0; i < self.source.length ; i++ ) {
 		var source = self.source[i]; 
@@ -455,22 +464,36 @@ o3video.prototype.create_video = function() {
 
 	//create iframe video object and copy original video properties
 	this.$iframe_vid = jQuery('<video id="video" width="100%" height="100%"'
-						+ ( this.origin.autoplay ? ' autoplay ' : '' )
+						/*+ ( this.origin.autoplay ? ' autoplay ' : '' )*/
 						+ ( this.origin.controls ? ' controls ' : '' )
 						+ ( this.origin.loop ? ' loop ' : '' )
 						+ ( this.origin.muted ? ' muted ' : '' )
 						+ ( this.origin.poster ? ' poster="'+this.origin.poster+'" ' : '' )
 						+ ( this.origin.preload ? ' preload="'+this.origin.preload+'" ' : '' )
 						+ ' >'+sources/*this.origin.innerHTML*/+'</video>').appendTo(this.$iframe_main);			
+	var vid = this.$iframe_vid.get(0);
 
 	//bugfix for chrome, force to reload the file
-	if ( typeof this.$iframe_vid.get(0).load == 'function' )
-		this.$iframe_vid.get(0).load();
+	if ( typeof vid.load == 'function' )
+		vid.load();
 	
 	if ( this.origin.poster ) {
-		this.$iframe_vid.get(0).poster = '';
-		this.$iframe_vid.get(0).poster = this.origin.poster;
-	}
+		vid.poster = '';
+		vid.poster = this.origin.poster;
+	};
+
+	//ff fix
+	if ( this.origin.muted && this.origin.muted === true )
+		vid.muted = true;
+
+	//set volume
+	if ( this.origin.volume && !this.origin.muted ) {		
+		vid.volume = this.origin.volume / 100;
+	};
+
+	//chrome fix. Handle autoplay
+	if ( this.origin.autoplay )
+		vid.play();
 
 	//on playing hide overlay play btn
 	this.$iframe_vid.bind('playing',function(){ self.hideOverlayPlayBtn(); });
@@ -484,7 +507,7 @@ o3video.prototype.create_video = function() {
 */
 o3video.prototype.is_codec_video = function( mime ) {
 	//check for html5 video support
-	if ( !!document.createElement('video').canPlayType ) {
+	if ( this.supports_video() ) {
 		var video = document.createElement("video");
 		switch ( mime ) {
 			case 'video/mp4':
@@ -493,9 +516,17 @@ o3video.prototype.is_codec_video = function( mime ) {
 				return video.canPlayType('video/webm; codecs="vp8.0, vorbis"');
 			case 'video/ogg':
 				return video.canPlayType('video/ogg; codecs="theora, vorbis"');
-		}
-	}
+		};
+	};
 	return false;
+};
+
+/** 
+* Check if browser supports video tag
+* @return boolean
+*/
+o3video.prototype.supports_video = function() {
+  return !!document.createElement('video').canPlayType;
 };
 
 /** 
@@ -513,17 +544,17 @@ o3video.prototype.get_flash_version = function() {
       	axo.AllowScriptAccess = 'always'; 
       } catch(e) { 
       	return '6,0,0'; 
-      }
-    } catch(e) {}
+      };
+    } catch(e) {};
     return new ActiveXObject('ShockwaveFlash.ShockwaveFlash').GetVariable('$version').replace(/\D+/g, ',').match(/^,?(.+),?$/)[1];
   // other browsers
   } catch(e) {
     try {
       if(navigator.mimeTypes["application/x-shockwave-flash"].enabledPlugin){
         return (navigator.plugins["Shockwave Flash 2.0"] || navigator.plugins["Shockwave Flash"]).description.replace(/\D+/g, ",").match(/^,?(.+),?$/)[1];
-      }
-    } catch(e) {}
-  }
+      };
+    } catch(e) {};
+  };
   return '0,0,0';
 };
 
@@ -598,4 +629,4 @@ if ( typeof jQuery != 'undefined' ) {
 	};
 } else {
 	console.log('O3 Video: jQuery missing!');
-}
+};
