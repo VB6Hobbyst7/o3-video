@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>O3-video by zoli-fischer</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>O3-video</h1>
+        <h2>Cross browser HTML5 / Adobe Flash video player</h2>
+        <a href="https://github.com/zoli-fischer/o3-video" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a id="o3-video-v112---html5-video-player--with-adobe-flash-video-player-fallback-" class="anchor" href="#o3-video-v112---html5-video-player--with-adobe-flash-video-player-fallback-" aria-hidden="true"><span class="octicon octicon-link"></span></a>o3-video v1.1.2 - HTML5 Video Player ( with Adobe Flash video player fallback )</h1>
+
+<blockquote>
+<p>o3-video is a HTML5 video player built on the web browser's basic HTML5 player and a small Adobe Flash video player. It supports video playback on desktops and mobile devices.</p>
+</blockquote>
+
+<h2>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h2>
+
+<ul>
+<li>Plays mp4 ( with h264 codec ) on all devices</li>
+<li>Works on desktops and mobile devices</li>
+<li>Supported web browsers: iOS (v3.0+), Android (v3.0+), Windows Mobile (v10+), Internet Explorer (v5.5+), Mozilla Firefox, Chrome, Safari, Opera </li>
+<li>Lightweight, less than 40kb</li>
+<li>Multi language interface with auto-detect of web browser's language (Supported languages: English, Danish, Hungarian)</li>
+</ul>
+
+<h2>
+<a id="demo" class="anchor" href="#demo" aria-hidden="true"><span class="octicon octicon-link"></span></a>Demo</h2>
+
+<p><a href="//o3-video.s3.amazonaws.com/demo.html">Click here for live demo</a></p>
+
+<p>Scan this QR code for live demo on your phone or table:</p>
+
+<p><img src="http://o3-video.s3.amazonaws.com/qr.png" alt=""></p>
+
+<h2>
+<a id="sample-code" class="anchor" href="#sample-code" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sample Code</h2>
+
+<div class="highlight highlight-html"><pre>&lt;!DOCTYPE html&gt;
+&lt;<span class="pl-ent">head</span>&gt;
+    &lt;<span class="pl-ent">title</span>&gt;o3-video Sample Code&lt;/<span class="pl-ent">title</span>&gt; 
+<span class="pl-s2">    &lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s1"><span class="pl-pds">"</span>//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;</span>
+<span class="pl-s2">    &lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s1"><span class="pl-pds">"</span>o3-video/o3-video.min.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;</span>
+<span class="pl-s2">    &lt;<span class="pl-ent">script</span> <span class="pl-e">type</span>=<span class="pl-s1"><span class="pl-pds">"</span>text/javascript<span class="pl-pds">"</span></span>&gt;</span>
+<span class="pl-s2">        (<span class="pl-st">function</span>(<span class="pl-vpf">$</span>) {</span>
+<span class="pl-s2">            $(<span class="pl-s3">document</span>).ready(<span class="pl-st">function</span> () {                             </span>
+<span class="pl-s2">                $(<span class="pl-s1"><span class="pl-pds">'</span>#video1<span class="pl-pds">'</span></span>).o3video();        </span>
+<span class="pl-s2">            });</span>
+<span class="pl-s2">        })(jQuery);</span>
+<span class="pl-s2">    &lt;/<span class="pl-ent">script</span>&gt;</span>
+&lt;/<span class="pl-ent">head</span>&gt;
+&lt;<span class="pl-ent">body</span>&gt;
+    &lt;<span class="pl-ent">video</span> <span class="pl-e">width</span>=<span class="pl-s1"><span class="pl-pds">"</span>540<span class="pl-pds">"</span></span> <span class="pl-e">height</span>=<span class="pl-s1"><span class="pl-pds">"</span>380<span class="pl-pds">"</span></span> <span class="pl-e">controls</span> <span class="pl-e">poster</span>=<span class="pl-s1"><span class="pl-pds">"</span>poster1.jpg<span class="pl-pds">"</span></span> <span class="pl-e">id</span>=<span class="pl-s1"><span class="pl-pds">"</span>video1<span class="pl-pds">"</span></span>&gt;
+        &lt;<span class="pl-ent">source</span> <span class="pl-e">src</span>=<span class="pl-s1"><span class="pl-pds">"</span>video1.mp4<span class="pl-pds">"</span></span> <span class="pl-e">type</span>=<span class="pl-s1"><span class="pl-pds">"</span>video/mp4<span class="pl-pds">"</span></span>&gt; 
+    &lt;/<span class="pl-ent">video</span>&gt;
+&lt;/<span class="pl-ent">body</span>&gt;
+&lt;/<span class="pl-ent">html</span>&gt;</pre></div>
+
+<h1>
+<a id="compatibility" class="anchor" href="#compatibility" aria-hidden="true"><span class="octicon octicon-link"></span></a>Compatibility</h1>
+
+<p>Confirmed as working with iOS (v4.0+), Android (v3.0+), Windows Mobile (v10+), Internet Explorer (v5.5+), Mozilla Firefox, Chrome, Safari, Opera. Web browsers without HTML 5 video tag support or mp4 (h264 codec) needs Adobe Flash Player v9.0+. </p>
+
+<h2>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements</h2>
+
+<p><a href="http://jquery.com/download">jQuery 1.6.0 or higher</a></p>
+
+<h2>
+<a id="download" class="anchor" href="#download" aria-hidden="true"><span class="octicon octicon-link"></span></a>Download</h2>
+
+<p><a href="https://github.com/zoli-fischer/o3-video/raw/master/o3-video.zip">Click here for download</a></p>
+
+<h1>
+<a id="upcoming-features" class="anchor" href="#upcoming-features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Upcoming features</h1>
+
+<ul>
+<li>Full control over player with javascript calls</li>
+<li>Interface customisation with skins</li>
+<li>Custom javascript HTML5 video player</li>
+</ul>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h2>
+
+<p>o3-video is licensed under the MIT License. <a href="LICENSE">View the license file</a></p>
+
+<p>Copyright 2014 Zoltan Fischer</p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/zoli-fischer/o3-video/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/zoli-fischer/o3-video/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/zoli-fischer/o3-video"></a> is maintained by <a href="https://github.com/zoli-fischer">zoli-fischer</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
