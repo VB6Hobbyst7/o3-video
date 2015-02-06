@@ -1,4 +1,4 @@
-# o3-video v1.1.2 - HTML5 Video Player ( with Adobe Flash video player fallback )
+# o3-video v1.1.3 - HTML5 Video Player ( with Adobe Flash video player fallback )
 
 > o3-video is a HTML5 video player built on the web browser's basic HTML5 player and a small Adobe Flash video player. It supports video playback on desktops and mobile devices.
 

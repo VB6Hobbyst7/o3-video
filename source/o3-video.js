@@ -116,22 +116,23 @@ o3video = function( opts, container ) {
 	self.flash_src = '';
 
 	//store original video attributes
-	self.origin = { /*autoplay: self.get_prop( self.$container, "autoplay", false ),*/
+	self.origin = { /*autoplay: self.get_attr( self.$container, "autoplay", false ),*/
 					//check for muted, webkit dosn't supports the muted attribute, we need to check in the HTML code, @todo: regexp need to improved
 					autoplay: / autoplay/i.test(self.$container.get(0).outerHTML), 
 					volume: self.get_attr( self.$container, "volume", '100' ),
 					controls: / controls/i.test(self.$container.get(0).outerHTML), 
-					//controls: self.get_prop( self.$container, "controls", false ),
-					height: self.get_prop( self.$container, "height", 'auto' ),
-					loop: self.get_prop( self.$container, "loop", false ),
+					//controls: self.get_attr( self.$container, "controls", false ),
+					height: self.get_attr( self.$container, "height", 'auto' ),
+					//loop: self.get_prop( self.$container, "loop", false ),
+					loop: / loop/i.test(self.$container.get(0).outerHTML), 
 					//check for muted, webkit dosn't supports the muted attribute, we need to check in the HTML code, @todo: regexp need to improved
 					muted: / muted/i.test(self.$container.get(0).outerHTML), 
-					poster: self.get_prop( self.$container, "poster", '' ),
-					preload: self.get_prop( self.$container, "preload", false ),
-					src: self.get_prop( self.$container, "src", '' ),
+					poster: self.get_attr( self.$container, "poster", '' ),
+					preload: self.get_attr( self.$container, "preload", false ),
+					src: self.get_attr( self.$container, "src", '' ),
 					width: self.get_attr( self.$container, "width", 'auto' ),
 					height: self.get_attr( self.$container, "height", 'auto' ),
-					innerHTML: self.get_prop( self.$container, "innerHTML", '' ) };		
+					innerHTML: self.get_attr( self.$container, "innerHTML", '' ) };			
 
 	/** Constructor */
 	self.constructor__ = function() {
@@ -147,10 +148,10 @@ o3video = function( opts, container ) {
 			style: self.$container.attr("style"),
 			'class': self.$container.attr("class")		
 		}).css('overflow','hidden');
-		self.$iframe.get(0).o3video = self;		
+		self.$iframe.get(0).o3video = self;
 
 		//get source
-		if ( self.origin.src != '' ) {
+		if ( jQuery.trim(self.origin.src).length > 0 ) {						
 
 			//only store the source if src and type is valid  
 			if ( self.ext2mime(self.origin.src) != '' ) {
@@ -162,17 +163,18 @@ o3video = function( opts, container ) {
 			};
 
 			//set as flash src if is a mp4 file
-			if ( self.ext2mime(self.origin.src) == 'video/mp4' &&  self.flash_src == '' )
+			if ( self.ext2mime(self.origin.src) == 'video/mp4' && self.flash_src == '' )
 				self.flash_src = self.origin.src;
-		};
+		};		
 
 		//get sources
 		self.$container.find('source').each(function(){
+
 			//get source's src + type, if no mime type defined try to get from the src 
-			var src = self.get_prop( $(this), 'src', '' ),
-				type = self.get_prop( $(this), 'type', self.ext2mime(src) ),
+			var src = self.get_attr( $(this), 'src', '' ),
+				type = self.get_attr( $(this), 'type', self.ext2mime(src) ),
 				has_codec = self.is_codec_video(type),
-				media = self.get_prop( $(this), 'media', '' );
+				media = self.get_attr( $(this), 'media', '' );
 
 			//update codec was found for source  
 			if ( has_codec )
@@ -184,20 +186,20 @@ o3video = function( opts, container ) {
 
 			//remove source from DOM
 			$(this).attr( 'src', '' ); 
-			$(this).remove();
-
+			$(this).remove();			
+			
 			//set as flash src if is a mp4 file
 			if ( type == 'video/mp4' && self.flash_src == '' )
-				self.flash_src = src;				
+				self.flash_src = src;						
 				
-		});		
+		});
 
 		//get message for browsers that do not support the <video> element
-		var no_support_msg = self.get_prop( self.$container, "innerHTML", '' );
+		var no_support_msg = self.get_attr( self.$container, "innerHTML", '' );
 		no_support_msg = $.trim(no_support_msg).length == 0 ? self.translations.no_support_msg : no_support_msg;
 
 		//web browser without video tag support, so we need to remove the video sibling by sibling from DOM
-		if ( !this.supports_video() /*/MSIE/i.test(navigator.userAgent) && parseFloat((navigator.userAgent.toLowerCase().match(/.*(?:rv|ie)[\/: ](.+?)([ \);]|$)/) || [])[1]) <= 9 */) {			
+		if ( /*!this.supports_video()*/ /MSIE/i.test(navigator.userAgent) && parseFloat((navigator.userAgent.toLowerCase().match(/.*(?:rv|ie)[\/: ](.+?)([ \);]|$)/) || [])[1]) <= 9 ) {			
 			var old_obj = self.$container.get(0),
 				rem_list = [];	
 			//get elements from inside the video
@@ -206,12 +208,7 @@ o3video = function( opts, container ) {
 				//get flash source for ie8
 				if ( old_obj.tagName == 'SOURCE' ) {					
 					if ( self.ext2mime(old_obj.src) == 'video/mp4' && self.flash_src == '' )
-						self.flash_src = old_obj.src;					
-					if ( !(/^(?:[a-z]+:)?\/\//i.test(self.flash_src)) ) {						
-						//if the src is relative we need to convert to absolute
-						var url = window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1);
-						self.flash_src = window.location.protocol+'//'+window.location.hostname+( self.flash_src.charAt(0) == '/' ? '' : url )+self.flash_src;
-					};
+						self.flash_src = old_obj.src;										
 				};
 				if ( old_obj.tagName != 'IFRAME' )
 					rem_list.push( old_obj );
@@ -225,6 +222,11 @@ o3video = function( opts, container ) {
 				$(rem_list[i]).remove();
 		};
 
+		if ( !(/^(?:[a-z]+:)?\/\//i.test(self.flash_src)) ) {
+			//if the src is relative we need to convert to absolute
+			var url = window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1);
+			self.flash_src = window.location.protocol+'//'+window.location.hostname+( self.flash_src.charAt(0) == '/' ? '' : url )+self.flash_src;
+		};
 
 		setTimeout( function() {
 
@@ -281,17 +283,17 @@ o3video = function( opts, container ) {
 			//create video tag
 			self.create_video();			
 
-		} else {
+		} else {			
 
 			//hide the overlay play button
 			this.$playbtn.css('display','none');
 
 			//check for flash player version
-			self.flash_exists = self.get_flash_version().split(',').shift();
+			self.flash_exists = self.get_flash_version().split(',').shift();			
 
 			//if flash player ver min. 9 exists and mp4 source exists show flash player
-			if ( self.flash_exists >= 9 && self.flash_src != '' ) {			
-				
+			if ( self.flash_exists >= 9 && self.flash_src != '' ) {
+
 				//create flash object
 				self.create_flash();
 
@@ -434,7 +436,7 @@ o3video.prototype.create_flash = function() {
 				 <param name="allowFullScreen" value="true"></param>\
 				 <param name="allowscriptaccess" value="always"></param>\
 				 <param name="quality" value="hight"></param>\
-				 <param name="wmode" value="direct"></param>\
+				 <param name="wmode" value="transparent"></param>\
 				 <param name="menu" value="true"></param>'
 				 + embed
 				 +'</object>';
